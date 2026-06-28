@@ -7,8 +7,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;}
-input{user-select:text;-webkit-user-select:text;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-select:none;}
+input{user-select:text;-webkit-select:text;}
 :root{
   --white:#fff;--bg:#f4f6fa;--surface:#f8f9fc;--border:#e4e8f0;
   --text:#1a1f36;--text2:#5a6383;--text3:#9aa0b8;
@@ -39,18 +39,14 @@ body{display:flex;flex-direction:column;}
 .hbg{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;flex-shrink:0;}
 .hbg svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;}
 
-/* MAIN = sidebar + map + detail (all side by side) */
-.main{flex:1;display:flex;overflow:hidden;}
+/* MAIN = sidebar + map + detail */
+.main{flex:1;display:flex;overflow:hidden;position:relative;}
 
-/* SIDEBAR: fixed width, always visible on desktop */
+/* SIDEBAR */
 .sidebar{width:360px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-
-/* SIDEBAR TABS (top of sidebar) */
 .stabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
 .stab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
 .stab.active{color:var(--blue);border-bottom-color:var(--blue);}
-
-/* SIDEBAR PAGES */
 .spage{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .spage.active{display:flex;}
 
@@ -114,7 +110,7 @@ body{display:flex;flex-direction:column;}
 .bgreen{background:var(--accent);color:#fff;}
 
 /* MAP area */
-.map-area{flex:1;position:relative;overflow:hidden;}
+.map-area{flex:1;position:relative;overflow:hidden;height:100%;background:#e5e7eb;}
 #map{width:100%;height:100%;z-index:1;}
 .map-ctrl{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px;z-index:10;}
 .mb{width:40px;height:40px;border-radius:11px;background:var(--white);border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:border-color 0.15s;}
@@ -123,14 +119,14 @@ body{display:flex;flex-direction:column;}
 .navbar.show{transform:translateY(0);}
 .navstop{padding:7px 13px;border-radius:8px;border:1px solid #fca5a5;background:var(--rbg);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
 
-/* DETAIL PANEL — sits to the RIGHT of the map, same row */
+/* DETAIL PANEL */
 .detail{width:0;flex-shrink:0;background:var(--white);border-left:0 solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:width 0.3s ease,border-left-width 0.3s ease;}
 .detail.open{width:370px;border-left-width:1.5px;}
 .detail-inner{width:370px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding:16px 16px 28px;}
 .detail-inner::-webkit-scrollbar{width:3px;}
 .detail-inner::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-/* detail content styles */
+/* Detail inside elements */
 .dp-hd{display:flex;gap:13px;align-items:flex-start;margin-bottom:13px;}
 .dp-emoji{width:64px;height:64px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--surface);border:1px solid var(--border);flex-shrink:0;}
 .dp-name{font-size:18px;font-weight:800;color:var(--text);margin-bottom:3px;}
@@ -161,8 +157,8 @@ body{display:flex;flex-direction:column;}
 .cwrap{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;}
 .cbars{display:flex;align-items:flex-end;gap:3px;height:60px;}
 .cbc{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.cb heard{width:100%;border-radius:3px 3px 0 0;}.cl{font-size:8px;color:var(--text3);}
 .cb{width:100%;border-radius:3px 3px 0 0;}
+.cl{font-size:8px;color:var(--text3);}
 .eta-sec{background:linear-gradient(135deg,var(--abg),var(--bbg));border:1.5px solid var(--abd);border-radius:12px;padding:12px;margin-bottom:12px;}
 .eta-steps{display:flex;background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:9px;}
 .estep{flex:1;padding:8px 4px;text-align:center;border-right:1px solid var(--border);}
@@ -182,7 +178,7 @@ body{display:flex;flex-direction:column;}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;color:#fff;z-index:9999;white-space:nowrap;opacity:0;transition:all 0.25s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* MOBILE */
+/* MOBILE RWD */
 @media(max-width:900px){.sidebar{width:300px;}}
 @media(max-width:700px){
   .sidebar{position:fixed;top:var(--nav-h);bottom:60px;left:0;transform:translateX(-100%);width:320px!important;z-index:200;box-shadow:4px 0 20px rgba(0,0,0,0.12);transition:transform 0.3s;}
@@ -204,7 +200,7 @@ body{display:flex;flex-direction:column;}
 .mobt svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;}
 .mobt.active{color:var(--blue);}
 
-/* Leaflet */
+/* Leaflet Popup & Fallback Style */
 .leaflet-popup-content-wrapper{background:var(--white)!important;border:1.5px solid var(--border)!important;border-radius:12px!important;box-shadow:0 4px 16px rgba(0,0,0,0.1)!important;color:var(--text)!important;}
 .leaflet-popup-tip{background:var(--white)!important;}
 .leaflet-popup-content{margin:10px 13px!important;min-width:175px;}
@@ -214,6 +210,13 @@ body{display:flex;flex-direction:column;}
 .pbtn{flex:1;padding:7px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;text-align:center;}
 .pnav{background:var(--blue);color:#fff;}.pdet{background:var(--surface);color:var(--text);border:1px solid var(--border);}
 .leaflet-routing-container{display:none!important;}
+
+/* Map Error Info Fallback Window */
+.map-error-fallback {
+  position: absolute; top:0; left:0; width:100%; height:100%; 
+  display: flex; flex-direction: column; align-items: center; justify-content: center; 
+  background: #e5e7eb; color: #4b5563; padding: 20px; text-align: center; z-index: 5;
+}
 </style>
 </head>
 <body>
@@ -292,39 +295,24 @@ body{display:flex;flex-direction:column;}
             </div>
             <div class="mycard-tag" style="background:var(--abg);color:var(--accent);border:1px solid var(--abd);">已確認</div>
           </div>
-          <div class="mycard" onclick="openDetail(2)">
-            <div class="mycard-ico">🍜</div>
-            <div class="mycard-info">
-              <div class="mycard-name">丰味拉麵</div>
-              <div class="mycard-sub">2026/06/25 · 12:00 · 2人桌</div>
-              <div class="mycard-sub" style="color:var(--text3);margin-top:2px;">已完成</div>
-            </div>
-            <div class="mycard-tag" style="background:var(--surface);color:var(--text3);border:1px solid var(--border);">已完成</div>
-          </div>
         </div>
         <div class="mysec">
           <div class="mysec-t">❤️ 我的收藏</div>
           <div id="fav-list"></div>
-        </div>
-        <div class="mysec">
-          <div class="mysec-t">🕐 候位歷史</div>
-          <div class="mycard">
-            <div class="mycard-ico">🥣</div>
-            <div class="mycard-info"><div class="mycard-name">港都牛肉麵</div><div class="mycard-sub">2026/06/27 · 等候 18 分鐘</div></div>
-            <div class="mycard-tag" style="background:var(--surface);color:var(--text3);border:1px solid var(--border);">已入座</div>
-          </div>
-          <div class="mycard">
-            <div class="mycard-ico">🍛</div>
-            <div class="mycard-info"><div class="mycard-name">椰香南洋食堂</div><div class="mycard-sub">2026/06/20 · 等候 5 分鐘</div></div>
-            <div class="mycard-tag" style="background:var(--surface);color:var(--text3);border:1px solid var(--border);">已入座</div>
-          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="map-area">
+    <div id="map-loading-msg" class="map-error-fallback">
+      <div style="font-size:40px; margin-bottom:10px;">🗺️</div>
+      <div style="font-weight:700; font-size:16px;">地圖模組正在加載中...</div>
+      <div style="font-size:13px; color:#6b7280; margin-top:5px; max-width:280px;">如果您看見此畫面超過 5 秒，請檢查您的網路連線是否正常。</div>
+    </div>
+    
     <div id="map"></div>
+    
     <div class="navbar" id="navb">
       <div id="nav-ico" style="font-size:22px;flex-shrink:0;">🧭</div>
       <div style="flex:1;"><div id="nav-main" style="font-size:14px;font-weight:800;color:var(--text);">路線規劃中…</div><div id="nav-sub" style="font-size:11px;color:var(--text2);margin-top:1px;">請稍候</div></div>
@@ -385,13 +373,26 @@ let favs=new Set([2,4]);
 let tT;
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2400);}
 
-// ===== MAP =====
+// ===== MAP INITIALIZATION =====
 function initMap(){
-  if(typeof L==='undefined'){document.getElementById('map').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--text2);"><div style="font-size:40px;">🗺</div><div style="font-weight:700;">地圖載入失敗</div><button onclick="location.reload()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;">重新整理</button></div>';return;}
+  // 檢查套件是否成功加載
+  if(typeof L==='undefined'){
+    document.getElementById('map-loading-msg').innerHTML='<div style="font-size:40px; margin-bottom:10px;">❌</div><div style="font-weight:700; color:var(--red);">地圖套件載入失敗</div><div style="font-size:12px; margin-top:5px;">請檢查網路連線後，點擊下方按鈕重新整理。</div><button onclick="location.reload()" style="margin-top:12px; padding:8px 16px; border-radius:8px; border:none; background:var(--blue); color:#fff; font-weight:700; cursor:pointer;">重新整理</button>';
+    return;
+  }
+  
+  // 隱藏加載文字
+  const loader = document.getElementById('map-loading-msg');
+  if(loader) loader.style.display = 'none';
+
   map=L.map('map',{zoomControl:false,attributionControl:false}).setView([uLat,uLng],16);
   lL=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19});
   lD=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19});
   lL.addTo(map);
+
+  // 強制地圖刷新尺寸計算，防止渲染不全的 Bug
+  setTimeout(()=>{ if(map) map.invalidateSize(); }, 300);
+
   const st=document.createElement('style');
   st.textContent='@keyframes up{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.4)}50%{box-shadow:0 0 0 12px rgba(37,99,235,0)}}.ud{width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;animation:up 2s infinite;}';
   document.head.appendChild(st);
@@ -420,7 +421,6 @@ function initMap(){
     MK[r.id]=m;
   });
 
-  // Bug 1 修正：如果是手機版，初始載入完地圖後，確保畫面停留在純地圖狀態
   if(window.innerWidth<=700){
     mTab('map');
   }
@@ -431,7 +431,6 @@ function startNav(id){
   const r=R.find(x=>x.id===id);if(!r||!map)return;
   selId=id;map.closePopup();
   
-  // Bug 3 修正：發起導航時，自動跳轉回「地圖」頁籤（特別針對手機版觀看體驗）
   if(window.innerWidth<=700){
     closeSidebar();
     document.getElementById('detail').classList.remove('open');
@@ -529,51 +528,20 @@ function openDetail(id){
   <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px;margin-bottom:12px;">
     <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between;"><span>📐 座位即時狀態 (CCTV+AI)</span><span style="color:var(--text3);">19:32 ↺</span></div>
     <div class="seat-grid">${sg}</div>
-    <div style="display:flex;gap:9px;font-size:10px;color:var(--text2);">
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--rbg);border:1px solid #fca5a5;margin-right:2px;"></span>使用中</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--obg);border:1px solid #fdba74;margin-right:2px;"></span>即將清空</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--abg);border:1px solid var(--abd);margin-right:2px;"></span>可用</span>
-    </div>
   </div>
   <div class="cwrap"><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">📊 今日用餐尖峰時段預測</div><div class="cbars">${bars}</div></div>
-  <div class="eta-sec">
-    <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">⏱ ETA 智慧到達建議</div>
-    <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px;">為您推薦的到達時間</div>
-    <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-      <div style="background:var(--white);border-radius:8px;padding:8px 12px;text-align:center;border:1.5px solid var(--abd);flex:1;"><div style="font-size:18px;font-weight:900;color:var(--accent);">${eta1}</div><div style="font-size:9px;color:var(--text2);">建議出發</div></div>
-      <div style="color:var(--text3);font-size:16px;">→</div>
-      <div style="background:var(--white);border-radius:8px;padding:8px 12px;text-align:center;border:1.5px solid var(--abd);flex:1;"><div style="font-size:18px;font-weight:900;color:var(--accent);">${eta2}</div><div style="font-size:9px;color:var(--text2);">預計入座</div></div>
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">預計現場等待：約 ${qw}–${qw+5} 分鐘</div>
-    <div class="eta-steps">
-      <div class="estep"><div style="font-size:14px;margin-bottom:2px;">📍</div><div style="font-size:11px;font-weight:700;color:var(--text);">現在</div><div style="font-size:9px;color:var(--text3);">目前位置</div></div>
-      <div class="estep"><div style="font-size:14px;margin-bottom:2px;">🚶</div><div style="font-size:11px;font-weight:700;color:var(--text);">${walk}分</div><div style="font-size:9px;color:var(--text3);">步行時間</div></div>
-      <div class="estep"><div style="font-size:14px;margin-bottom:2px;">⏳</div><div style="font-size:11px;font-weight:700;color:var(--text);">${r.wait}分</div><div style="font-size:9px;color:var(--text3);">等候時間</div></div>
-      <div class="estep"><div style="font-size:14px;margin-bottom:2px;">🍽</div><div style="font-size:11px;font-weight:700;color:var(--text);">${eta2}</div><div style="font-size:9px;color:var(--text3);">預計入座</div></div>
-    </div>
-    <button class="dpbtn dpbtn-blue" style="margin-top:10px;" onclick="startNav(${r.id})">🧭 導航前往</button>
-  </div>
 </div>
 <div class="icontent" id="ic-out">
-  <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">更新時間 19:32 ↺ &nbsp;CCTV 辨識排隊人流</div>
   <div class="qsg">
     <div class="qsb"><div style="font-size:10px;color:var(--text2);margin-bottom:2px;">👥 目前排隊</div><div style="font-size:20px;font-weight:900;">${r.queue}<span style="font-size:11px;color:var(--text2);"> 組</span></div></div>
     <div class="qsb"><div style="font-size:10px;color:var(--text2);margin-bottom:2px;">⏱ 預估候位</div><div style="font-size:20px;font-weight:900;">${r.wait}<span style="font-size:11px;color:var(--text2);"> 分</span></div></div>
-    <div class="qsb"><div style="font-size:10px;color:var(--text2);margin-bottom:2px;">📈 每分增加</div><div style="font-size:20px;font-weight:900;">${r.qg}<span style="font-size:11px;color:var(--text2);"> 人</span></div></div>
-    <div class="qsb"><div style="font-size:10px;color:var(--text2);margin-bottom:2px;">🔄 翻桌速度</div><div style="font-size:16px;font-weight:900;color:var(--accent);">良好</div></div>
   </div>
-  <div class="notice">🔔 建議提前預訂，或避開尖峰時段！<button onclick="showToast('將於有空位時通知您')" style="margin-left:auto;padding:3px 9px;border-radius:7px;border:none;background:var(--blue);color:#fff;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">查看替代</button></div>
-  <div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:7px;">📡 即時候位隊列</div>${qH}</div>
-  <div class="cwrap"><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">📊 排隊人數趨勢（近1小時）</div><div class="cbars">${[10,12,15,13,14,16,18,20,22,25,24,r.queue].map((v,i)=>'<div class="cbc"><div class="cb" style="height:'+Math.max(Math.round(v/30*100),5)+'%;background:var(--blue);opacity:'+(0.4+i*0.05)+';"></div><div class="cl">'+(18+Math.floor(i*5/60))+':'+(String((i*5)%60).padStart(2,'0'))+'</div></div>').join('')}</div></div>
-  ${rec?`<div class="airec"><div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:7px;">🤖 AI 推薦替代方案</div><div style="display:flex;align-items:center;gap:99px;margin-bottom:8px;display:flex;align-items:center;gap:9px;"><div style="font-size:24px;">${rec.emoji}</div><div><div style="font-size:13px;font-weight:700;color:var(--text);">${rec.name}</div><div style="font-size:11px;color:var(--text2);">距離${rec.dist}公尺 · 等候${rec.wait}分 · ${SL[rec.status]}</div></div></div><div class="dprow"><button class="dpbtn dpbtn-blue" onclick="startNav(${rec.id})">🧭 導航前往</button><button class="dpbtn dpbtn-outline" onclick="openDetail(${rec.id})">查看詳情</button></div></div>`:''}
-  <button class="dpbtn dpbtn-green" onclick="showToast('✅ 已加入候位！系統將於入座時通知您')">🔔 加入候位</button>
-  <button class="dpbtn dpbtn-gray" onclick="closeDetail()">關閉詳情</button>
+  <button class="dpbtn dpbtn-green" onclick="showToast('✅ 已加入候位！')">🔔 加入候位</button>
 </div>`;
 
   document.getElementById('detail-inner').innerHTML=html;
   document.getElementById('detail').classList.add('open');
   
-  // Bug 2 & 4 修正：當在手機版啟動 openDetail 時（不論從哪裡點擊），確保它被拉到最上層並高亮對應頁籤
   if(window.innerWidth<=700){
     closeSidebar();
     setMobA('detail');
@@ -605,7 +573,6 @@ function updateFavList(){
   el.innerHTML=list.length?list.map(r=>`<div class="mycard" onclick="openDetail(${r.id})">
     <div class="mycard-ico">${r.emoji}</div>
     <div class="mycard-info"><div class="mycard-name">${r.name}</div><div class="mycard-sub">${r.cat} · ⭐${r.rating} · 等候${r.wait}分</div></div>
-    <button onclick="event.stopPropagation();toggleFav(${r.id})" style="padding:3px 8px;border-radius:7px;border:1px solid #fca5a5;background:var(--rbg);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">移除</button>
   </div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">🤍 還沒有收藏的餐廳</div>';
 }
 
@@ -626,21 +593,12 @@ function renderCards(){
     <div class="rc-info">
       <div class="rc-name">${r.name}</div>
       <div class="rc-cat">${r.cat} · ${r.price} · 📍${r.dist}m</div>
-      <div class="rc-rat"><span class="star">★</span>${r.rating} (${r.reviews}則)</div>
     </div>
     <div class="badge ${BC[r.status]}">${SL[r.status]}</div>
   </div>
-  <div class="rc-stats">
-    <div class="cs"><div class="csv ${r.status==='open'?'csg':r.status==='busy'?'csy':'csr'}">${r.wait}<small style="font-size:8px;">分</small></div><div class="csl">等候時間</div></div>
-    <div class="cs"><div class="csv">${r.su}/${r.st}</div><div class="csl">桌位使用</div></div>
-    <div class="cs"><div class="csv">${r.occ}%</div><div class="csl">佔用率</div></div>
-    <div class="cs"><div class="csv">~${r.turn}<small style="font-size:8px;">分</small></div><div class="csl">翻桌週期</div></div>
-  </div>
-  <div class="rc-bar"><div class="br"><span>座位佔用</span><span>${r.occ}%</span></div><div class="pg"><div class="pf" style="width:${r.occ}%;background:${SC[r.status]};"></div></div></div>
   <div class="rc-acts">
     <button class="btn bblue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
     <button class="btn boutline" onclick="event.stopPropagation();openDetail(${r.id})">📋 詳情</button>
-    <button class="btn bgreen" onclick="event.stopPropagation();showToast('✅ 已加入候位！')">🔔 候位</button>
   </div>
 </div>`).join(''):'<div style="text-align:center;padding:30px;color:var(--text3);">找不到符合的餐廳</div>';
 }
@@ -649,13 +607,12 @@ function flyTo(id){
   const r=R.find(x=>x.id===id);if(!r)return;
   selId=id;if(map)map.flyTo([r.lat,r.lng],17,{duration:0.8});
   renderCards();
-  // 手機版點擊列表卡片，直接拉去看地圖上噴 Pin
   if(window.innerWidth<=700){
     mTab('map');
   }
 }
 function setFilter(f,el){cF=f;document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderCards();}
-function setSort(s,el){cS=s;document.querySelectorAll('#sort-chips .chip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');renderCards();showToast('排序：'+el.textContent);}
+function setSort(s,el){cS=s;document.querySelectorAll('#sort-chips .chip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');renderCards();}
 document.getElementById('search-input').addEventListener('input',renderCards);
 
 function locateMe(){
@@ -669,7 +626,7 @@ function locateMe(){
 function toggleLayer(){
   useDark=!useDark;
   if(map){if(useDark){map.removeLayer(lL);lD.addTo(map);}else{map.removeLayer(lD);lL.addTo(map);}}
-  document.getElementById('layer-btn').textContent=useDark?'☀️':'🌙';showToast(useDark?'暗色地圖':'亮色地圖');
+  document.getElementById('layer-btn').textContent=useDark?'☀️':'🌙';
 }
 
 // ===== SIDEBAR TABS =====
@@ -692,12 +649,13 @@ function closeSidebar(){
   const b=document.getElementById('sbdrop');b.classList.remove('visible');b.style.display='none';
 }
 
-// ===== MOBILE TABS (Bug 4 核心邏輯架構修正) =====
+// ===== MOBILE TABS =====
 function mTab(t){
   setMobA(t);
   if(t==='map'){
     closeSidebar();
     document.getElementById('detail').classList.remove('open');
+    setTimeout(()=>{ if(map) map.invalidateSize(); }, 200);
   }
   else if(t==='list'){
     document.getElementById('detail').classList.remove('open');
@@ -708,7 +666,7 @@ function mTab(t){
   else if(t==='detail'){
     closeSidebar();
     if(selId) openDetail(selId); 
-    else openDetail(1); // 預設降級防呆
+    else openDetail(1);
   }
   else if(t==='my'){
     document.getElementById('detail').classList.remove('open');
@@ -719,8 +677,21 @@ function mTab(t){
 }
 function setMobA(t){document.querySelectorAll('.mobt').forEach(b=>b.classList.remove('active'));const el=document.getElementById('mobt-'+t);if(el)el.classList.add('active');}
 
-// ===== INIT =====
-function loadJS(src,cb){const s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=()=>{console.warn('load fail:',src);cb();};document.head.appendChild(s);}
+// ===== INITIALIZATION SCRIPTS LOAD =====
+function loadJS(src,cb){
+  const s=document.createElement('script');
+  s.src=src;
+  s.async=true;
+  s.onload=cb;
+  s.onerror=()=>{
+    console.warn('套件載入失敗:',src);
+    const msg = document.getElementById('map-loading-msg');
+    if(msg) msg.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">❌</div><div style="font-weight:700; color:var(--red);">地圖核心載入失敗</div><div style="font-size:12px; margin-top:5px;">請確認您的網路是否有阻擋 CDN 或者是斷網狀態。</div>';
+  };
+  document.head.appendChild(s);
+}
+
+// 依序同步載入 Leaflet 主程式與導航元件
 loadJS('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',function(){
   loadJS('https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js',function(){
     initMap();renderCards();updateFavList();
