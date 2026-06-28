@@ -103,7 +103,7 @@ body{display:flex;flex-direction:column;position:relative;}
 .cwrap{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;}
 .cbars{display:flex;align-items:flex-end;gap:3px;height:60px;}
 .cbc{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.cb{width:100%;border-radius:3px 3px 0 0;}
+.cb blend-mode: normal;width:100%;border-radius:3px 3px 0 0;}
 .cl{font-size:8px;color:var(--text3);}
 .dpbtn{width:100%;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;text-align:center;margin-bottom:7px;transition:all 0.15s;}
 .dpbtn-blue{background:var(--blue);color:#fff;}
@@ -143,13 +143,32 @@ body{display:flex;flex-direction:column;position:relative;}
   background: #e5e7eb; color: #4b5563; padding: 20px; text-align: center; z-index: 5;
 }
 
-/* 豐富版 Leaflet Popup 樣式優化 */
-.popup-card { min-width: 180px; font-family:-apple-system,sans-serif; color: var(--text); }
-.popup-hd { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
-.popup-title { font-size: 14px; font-weight: 800; color: var(--text); }
-.popup-meta { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-.popup-status { font-size: 11px; font-weight: 700; margin-bottom: 8px; display: inline-block; padding: 2px 6px; border-radius: 4px; }
-.popup-btn { display: block; width: 100%; text-align: center; padding: 6px 0; background: var(--blue); color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: none; }
+/* 【修正核心】地圖上直接永久顯示的大圖卡自訂樣式 */
+.leaflet-tooltip-own {
+  background: #fff !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12) !important;
+  font-family: -apple-system, sans-serif !important;
+  color: var(--text) !important;
+  white-space: normal !important;
+  pointer-events: auto !important; /* 重要：允許滑鼠和手指觸發卡片內按鈕點擊 */
+}
+/* 去除內建工具提示的尖角效果，使其更像乾淨的懸浮面板 */
+.leaflet-tooltip-own::before { display: none !important; }
+
+.tt-card { width: 175px; }
+.tt-hd { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.tt-title { font-size: 13px; font-weight: 800; color: var(--text); }
+.tt-meta { font-size: 11px; color: var(--text2); margin-bottom: 4px; line-height: 1.3; }
+.tt-status { font-size: 10px; font-weight: 700; display: inline-block; padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; }
+.tt-btn-row { display: flex; gap: 5px; }
+.tt-btn { flex: 1; text-align: center; padding: 6px 0; font-size: 11px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+.tt-btn-b { background: var(--blue); color: #fff; }
+.tt-btn-b:hover { background: #1d4ed8; }
+.tt-btn-o { background: var(--surface); color: var(--blue); border: 1px solid var(--blue); }
+.tt-btn-o:hover { background: var(--bbg); }
 </style>
 </head>
 <body>
@@ -292,47 +311,50 @@ function initMap(){
 
   setTimeout(()=>{ if(map) map.invalidateSize(); }, 300);
 
+  // 我的定位點標記
   const ui=L.divIcon({html:'<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,0.3);"></div>',iconSize:[16,16],iconAnchor:[8,8],className:''});
   L.marker([uLat,uLng],{icon:ui}).addTo(map);
   
+  // 遍歷所有餐廳：免點擊直接攤開大圖卡且附帶一鍵功能按鈕
   R.forEach(r=>{
     const c=r.status==='open'?'#1a9e6e':r.status==='busy'?'#d97706':'#ef4444';
     const sbg=r.status==='open'?'var(--abg)':r.status==='busy'?'var(--ybg)':'var(--rbg)';
     const sbd=r.status==='open'?'var(--abd)':r.status==='busy'?'#fde68a':'#fca5a5';
-    const wt=r.wait===0?'立即':r.wait+'分';
     
-    const ic=L.divIcon({
-      html:`<div style="background:#fff;border:2px solid ${c};border-radius:8px;padding:3px 6px;display:flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,0.15);white-space:nowrap;">
-        <span style="font-size:13px;">${r.emoji}</span>
-        <span style="font-size:11px;font-weight:800;color:#1a1f36;">${r.name} ${wt}</span></div>`,
-      iconSize:[110,32],iconAnchor:[55,32],className:''
-    });
+    // 使用隱形 Marker 作為 Tooltip 工具卡片的載體
+    const invisibleIcon = L.divIcon({ html: '', iconSize: [0,0], className: '' });
+    const m = L.marker([r.lat,r.lng], { icon: invisibleIcon }).addTo(map);
     
-    const m=L.marker([r.lat,r.lng],{icon:ic}).addTo(map);
-    
-    // 【修改重點】點擊框框的豐富內容化
-    m.bindPopup(`
-      <div class="popup-card">
-        <div class="popup-hd">
-          <span style="font-size:16px;">${r.emoji}</span>
-          <span class="popup-title">${r.name}</span>
+    // 渲染直接呈現的大圖卡 HTML內容
+    const content = `
+      <div class="tt-card">
+        <div class="tt-hd">
+          <span style="font-size:15px;">${r.emoji}</span>
+          <span class="tt-title">${r.name}</span>
         </div>
-        <div class="popup-meta">⭐ ${r.rating} (${r.reviews}則評論) · ${r.cat}</div>
-        <div class="popup-meta" style="color:var(--text2);">📍 距離您 ${r.dist} 公尺</div>
-        <div class="popup-status" style="background:${sbg}; color:${c}; border:1px solid ${sbd};">
-          ${SL[r.status]} · ⏱️ 等候 ${r.wait} 分鐘
+        <div class="tt-meta">⭐ ${r.rating} (${r.reviews}評) · ${r.cat}<br>📍 距您 ${r.dist}m</div>
+        <div class="tt-status" style="background:${sbg}; color:${c}; border:1px solid ${sbd};">
+          ${SL[r.status]} · ⏱️ ${r.wait}分
         </div>
-        <button onclick="openDetail(${r.id})" class="popup-btn">📋 查看詳情與線上候位</button>
+        <div class="tt-btn-row">
+          <button onclick="startNav(${r.id})" class="tt-btn tt-btn-b">🧭 導航</button>
+          <button onclick="openDetail(${r.id})" class="tt-btn tt-btn-o">📋 詳情</button>
+        </div>
       </div>
-    `);
+    `;
     
-    m.on('click',()=>selId=r.id);
+    m.bindTooltip(content, {
+      permanent: true,       // 免點擊直接顯示在上面
+      direction: 'top',      // 於標記上方對齊
+      interactive: true,     // 允許大卡片內部按鈕進行點擊操作
+      className: 'leaflet-tooltip-own' 
+    }).openTooltip();
   });
 }
 
 function startNav(id){
   const r=R.find(x=>x.id===id); if(!r||!map)return;
-  selId=id; map.closePopup();
+  selId=id;
   if(window.innerWidth<=700) mTab('map');
 
   if(rc){try{map.removeControl(rc);}catch(e){}rc=null;}
@@ -353,11 +375,11 @@ function stopNav(){
 function openDetail(id){
   const r=R.find(x=>x.id===id); if(!r)return;
   selId=id;
-  if(map) map.closePopup();
   const isFav=favs.has(id);
   const maxP=Math.max(...r.peak,1);
   const bars=r.peak.map((v,i)=>{const p=Math.round(v/maxP*100); return`<div class="cbc"><div class="cb" style="height:${Math.max(p,5)}%;background:var(--blue);"></div><div class="cl">${PH[i]}</div></div>`;}).join('');
 
+  // 點進去詳情後，在詳情面板內同步追加「一鍵導航」等核心按鈕
   const html=`
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
   <div style="font-size:16px;font-weight:800;">${r.emoji} ${r.name}</div>
@@ -372,7 +394,7 @@ function openDetail(id){
   </div>
 </div>
 <div class="dprow">
-  <button class="dpbtn dpbtn-blue" onclick="startNav(${r.id})">🧭 開始導航</button>
+  <button class="dpbtn dpbtn-blue" onclick="startNav(${r.id})">🧭 一鍵導航</button>
   <button class="dpbtn dpbtn-outline" onclick="toggleFav(${r.id})">${isFav?'❤️ 已收藏':'🤍 收藏'}</button>
 </div>
 <div class="cwrap"><div style="font-size:11px;font-weight:700;margin-bottom:8px;">📊 今日用餐尖峰預測</div><div class="cbars">${bars}</div></div>
@@ -398,7 +420,6 @@ function toggleFav(id){
   openDetail(id); updateFavList();
 }
 
-// 修正我的收藏空狀態排版
 function updateFavList(){
   const el=document.getElementById('fav-list'); if(!el)return;
   const list=R.filter(r=>favs.has(r.id));
