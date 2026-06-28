@@ -40,7 +40,7 @@ body{display:flex;flex-direction:column;}
 .hbg svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;}
 
 /* MAIN = sidebar + map + detail (all side by side) */
-.main{flex:1;display:flex;overflow:hidden;}
+.main{flex:1;display:flex;overflow:hidden;position:relative;}
 
 /* SIDEBAR: fixed width, always visible on desktop */
 .sidebar{width:360px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
@@ -114,8 +114,8 @@ body{display:flex;flex-direction:column;}
 .bgreen{background:var(--accent);color:#fff;}
 
 /* MAP area */
-.map-area{flex:1;position:relative;overflow:hidden;}
-#map{width:100%;height:100%;z-index:1;}
+.map-area{flex:1;position:relative;overflow:hidden;touch-action:none;}
+#map{width:100%;height:100%;z-index:1;touch-action:none;}
 .map-ctrl{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px;z-index:10;}
 .mb{width:40px;height:40px;border-radius:11px;background:var(--white);border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:border-color 0.15s;}
 .mb:hover{border-color:var(--blue);}
@@ -177,6 +177,11 @@ body{display:flex;flex-direction:column;}
 .dprow{display:flex;gap:7px;margin-bottom:7px;}
 .dprow .dpbtn{margin-bottom:0;}
 
+
+/* Mobile touch fix */
+.leaflet-container{touch-action:none!important;}
+.leaflet-drag-target{touch-action:none!important;}
+
 /* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;color:#fff;z-index:9999;white-space:nowrap;opacity:0;transition:all 0.25s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -184,7 +189,7 @@ body{display:flex;flex-direction:column;}
 /* MOBILE */
 @media(max-width:900px){.sidebar{width:300px;}}
 @media(max-width:700px){
-  .sidebar{position:fixed;top:var(--nav-h);bottom:60px;left:0;transform:translateX(-100%);z-index:200;box-shadow:4px 0 20px rgba(0,0,0,0.12);transition:transform 0.3s;}
+  .sidebar{position:fixed;top:var(--nav-h);bottom:60px;left:0;transform:translateX(-100%);z-index:200;box-shadow:4px 0 20px rgba(0,0,0,0.12);transition:transform 0.3s;touch-action:pan-y;}
   .sidebar.mopen{transform:translateX(0);}
   .sbackdrop{display:block!important;}
   .hbg{display:flex;}
@@ -192,12 +197,14 @@ body{display:flex;flex-direction:column;}
   .brand span{display:none;}
   .live-pill span{display:none;}
   .nav-search{max-width:none;}
-  .detail{position:fixed!important;top:var(--nav-h);bottom:60px;right:0;width:100%!important;border-left:none!important;border-top:1.5px solid var(--border);}
+  .detail{position:fixed!important;top:var(--nav-h);bottom:60px;right:0;width:100%!important;border-left:none!important;border-top:1.5px solid var(--border);pointer-events:none;}
+  .detail.open{pointer-events:all;}
   .mobtabs{display:flex!important;}
   .main{margin-bottom:60px;}
 }
-.sbackdrop{display:none;position:fixed;top:var(--nav-h);bottom:0;left:0;right:0;background:rgba(0,0,0,0.3);z-index:190;}
-.mobtabs{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--border);z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,0.07);}
+.sbackdrop{display:none;position:fixed;top:var(--nav-h);bottom:0;left:0;right:0;background:rgba(0,0,0,0.3);z-index:190;pointer-events:none;}
+.sbackdrop.visible{pointer-events:all;}
+.mobtabs{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--border);z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,0.07);touch-action:manipulation;}
 .mobt{flex:1;padding:9px 3px 7px;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);cursor:pointer;font-size:10px;font-weight:600;transition:color 0.15s;}
 .mobt svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;}
 .mobt.active{color:var(--blue);}
@@ -393,7 +400,21 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 // ===== MAP =====
 function initMap(){
   if(typeof L==='undefined'){document.getElementById('map').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--text2);"><div style="font-size:40px;">🗺</div><div style="font-weight:700;">地圖載入失敗</div><button onclick="location.reload()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;">重新整理</button></div>';return;}
-  map=L.map('map',{zoomControl:false,attributionControl:false}).setView([uLat,uLng],16);
+  map=L.map('map',{
+    zoomControl:false,
+    attributionControl:false,
+    dragging:true,
+    tap:true,
+    tapTolerance:15,
+    touchZoom:true,
+    bounceAtZoomLimits:false,
+    scrollWheelZoom:true,
+    doubleClickZoom:true
+  }).setView([uLat,uLng],16);
+  // Ensure Leaflet handles touch on iOS
+  if(L.Browser.mobile){
+    map.on('load', function(){map.dragging.enable();});
+  }
   lL=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19});
   lD=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19});
   lL.addTo(map);
