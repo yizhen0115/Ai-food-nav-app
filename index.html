@@ -214,69 +214,96 @@ body{display:flex;flex-direction:column;}
   position:absolute;bottom:0;left:0;right:0;z-index:10;
   background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);
   border-top:1px solid var(--border);border-radius:22px 22px 0 0;
-  box-shadow:0 -6px 24px rgba(0,0,0,0.1);
+  box-shadow:0 -4px 20px rgba(0,0,0,0.08);
   overflow:hidden;
-  max-height:240px;
   transition:max-height 0.38s cubic-bezier(0.32,0.72,0,1);
+  max-height:148px; /* 剛好容納 handle + header + 一排卡片 */
 }
 .rec-panel.closed{max-height:50px;}
+
 .rec-handle-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px 0;cursor:pointer;flex-shrink:0;
-}
-.rec-handle-bar{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto;}
-.rec-header{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 16px 8px;cursor:pointer;
-}
-.rec-header-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;}
-.rec-header-sub{font-size:11px;color:var(--text2);margin-left:2px;}
-.rec-toggle{
-  margin-left:auto;width:28px;height:28px;border-radius:50%;
-  background:var(--surface);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  font-size:12px;color:var(--text2);cursor:pointer;transition:all 0.3s;
-  flex-shrink:0;
+  padding:8px 16px 0;cursor:pointer;
 }
-.rec-panel.closed .rec-toggle{transform:rotate(180deg);}
+.rec-handle-bar{width:32px;height:3.5px;background:var(--border2);border-radius:2px;}
+
+.rec-header{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 14px 7px;cursor:pointer;
+}
+.rec-header-title{font-size:12px;font-weight:800;color:var(--text);letter-spacing:-0.2px;}
 .rec-live-pill{
-  display:flex;align-items:center;gap:4px;
+  display:flex;align-items:center;gap:3px;
   background:var(--rbg);border:1px solid #fca5a5;
-  border-radius:20px;padding:2px 8px;
+  border-radius:20px;padding:2px 7px;
   font-size:10px;font-weight:700;color:var(--red);flex-shrink:0;
 }
-.rec-scroll{display:flex;gap:9px;overflow-x:auto;padding:2px 16px 14px;scrollbar-width:none;}
+.rec-toggle{
+  margin-left:auto;width:24px;height:24px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text2);cursor:pointer;
+  transition:transform 0.3s;flex-shrink:0;
+}
+.rec-panel.closed .rec-toggle{transform:rotate(180deg);}
+
+/* 卡片橫向滾動區 */
+.rec-scroll{
+  display:flex;gap:8px;overflow-x:auto;
+  padding:0 14px 12px;scrollbar-width:none;
+  align-items:stretch;
+}
 .rec-scroll::-webkit-scrollbar{display:none;}
 
-/* 推薦卡片 */
+/* ── 推薦卡片（水平緊湊版）── */
 .rcard{
-  flex-shrink:0;width:152px;
+  flex-shrink:0;
+  /* 水平版：左側資訊 + 右側等候分數 */
+  display:flex;align-items:center;gap:10px;
   background:var(--white);border:1.5px solid var(--border);
-  border-radius:14px;padding:11px 12px;cursor:pointer;
+  border-radius:13px;padding:9px 11px;cursor:pointer;
   transition:all 0.18s;box-shadow:var(--shadow-sm);
-  position:relative;overflow:visible;
+  position:relative;min-width:190px;max-width:210px;
+  overflow:hidden;
 }
-.rcard:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(5,150,105,0.14);transform:translateY(-2px);}
 .rcard:active{transform:scale(0.97);}
-.rcard.top{border-color:var(--accent);background:linear-gradient(145deg,#f0fdf4,#fff);}
+.rcard.top{border-color:var(--accent);background:linear-gradient(135deg,#f0fdf4 0%,#fff 60%);}
+.rcard.top::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),#16a34a);border-radius:13px 0 0 13px;
+}
 .rcard-badge{
-  position:absolute;top:-9px;left:10px;
+  position:absolute;top:-8px;left:10px;
   background:linear-gradient(135deg,var(--accent),#16a34a);
-  color:#fff;font-size:10px;font-weight:700;
-  padding:2px 9px;border-radius:20px;white-space:nowrap;
+  color:#fff;font-size:9px;font-weight:700;
+  padding:2px 8px;border-radius:20px;white-space:nowrap;
   box-shadow:0 2px 6px rgba(5,150,105,0.3);
 }
-.rcard-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
-.rcard-ico{font-size:20px;line-height:1;}
+
+/* 左側：icon + 文字 */
+.rcard-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.rcard-ico{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.rcard-text{flex:1;min-width:0;}
 .rcard-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rcard-cat{font-size:10px;color:var(--text3);margin-top:1px;}
-.rcard-wait{font-size:22px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
-.rcard-wait-lbl{font-size:10px;color:var(--text3);font-weight:600;margin-top:1px;}
-.rcard-occ-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:7px 0;}
-.rcard-occ-fill{height:100%;border-radius:2px;transition:width 0.5s;}
-.rcard-btns{display:flex;gap:5px;margin-top:6px;}
-.rbtn{flex:1;padding:7px 3px;border-radius:9px;border:none;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
-.rbtn:active{transform:scale(0.96);}
+.rcard-cat{font-size:10px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rcard-occ-row{display:flex;align-items:center;gap:4px;margin-top:4px;}
+.rcard-occ-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.rcard-occ-fill{height:100%;border-radius:2px;}
+.rcard-occ-pct{font-size:9px;color:var(--text3);font-weight:600;flex-shrink:0;}
+
+/* 右側：等候時間 + 按鈕 */
+.rcard-right{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;}
+.rcard-wait-block{text-align:center;}
+.rcard-wait{font-size:20px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
+.rcard-wait-lbl{font-size:9px;color:var(--text3);font-weight:600;margin-top:1px;}
+.rcard-btns{display:flex;flex-direction:column;gap:4px;}
+.rbtn{width:52px;padding:5px 0;border-radius:8px;border:none;font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;white-space:nowrap;}
+.rbtn:active{transform:scale(0.95);}
 .rbtn-blue{background:var(--blue);color:#fff;}
 .rbtn-blue:hover{background:var(--blue2);}
 .rbtn-out{background:var(--surface);color:var(--blue);border:1px solid #bfdbfe;}
@@ -788,20 +815,32 @@ function renderRec(){
   document.getElementById('rec-scroll').innerHTML=sorted.map((r,i)=>{
     const clr=r.occ>79?'var(--red)':r.occ>49?'var(--yellow)':'var(--accent)';
     const isTop=i===0;
-    const waitDisp=r.wait===0
-      ?`<div class="rcard-wait" style="color:var(--accent);">立即</div><div class="rcard-wait-lbl">空位入座 ✨</div>`
-      :`<div class="rcard-wait" style="color:${clr};">${r.wait}<span style="font-size:12px;font-weight:600;color:var(--text3);"> 分</span></div><div class="rcard-wait-lbl">等候 · 佔用 ${r.occ}%</div>`;
+    const waitNum = r.wait===0?'0':String(r.wait);
+    const waitLbl = r.wait===0?'立即入座':'分鐘等候';
+    const waitClr = r.wait===0?'var(--accent)':clr;
+    const topMargin = isTop?'margin-top:6px;':'';
     return`<div class="rcard${isTop?' top':''}" onclick="openDetail(${r.id})">
       ${isTop?'<div class="rcard-badge">🤖 AI 首推</div>':''}
-      <div class="rcard-head" style="${isTop?'margin-top:8px;':''}">
-        <span class="rcard-ico">${r.emoji}</span>
-        <div style="min-width:0;"><div class="rcard-name">${r.name}</div><div class="rcard-cat">${r.cat} · 📍${r.dist}m</div></div>
+      <div class="rcard-left" style="${topMargin}">
+        <div class="rcard-ico">${r.emoji}</div>
+        <div class="rcard-text">
+          <div class="rcard-name">${r.name}</div>
+          <div class="rcard-cat">${r.cat} · 📍${r.dist}m</div>
+          <div class="rcard-occ-row">
+            <div class="rcard-occ-bar"><div class="rcard-occ-fill" style="width:${r.occ}%;background:${clr};"></div></div>
+            <span class="rcard-occ-pct">${r.occ}%</span>
+          </div>
+        </div>
       </div>
-      ${waitDisp}
-      <div class="rcard-occ-bar"><div class="rcard-occ-fill" style="width:${r.occ}%;background:${clr};"></div></div>
-      <div class="rcard-btns">
-        <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
-        <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
+      <div class="rcard-right" style="${topMargin}">
+        <div class="rcard-wait-block">
+          <div class="rcard-wait" style="color:${waitClr};">${waitNum}</div>
+          <div class="rcard-wait-lbl">${waitLbl}</div>
+        </div>
+        <div class="rcard-btns">
+          <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
+          <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
+        </div>
       </div>
     </div>`;
   }).join('');
