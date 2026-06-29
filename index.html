@@ -108,19 +108,22 @@ body{display:flex;flex-direction:column;}
   background:var(--white);
   border-top:1.5px solid var(--border);
   border-radius:20px 20px 0 0;
-  padding:0 14px 12px;
   box-shadow:0 -3px 16px rgba(0,0,0,0.09);
-  transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  overflow:hidden;
+  transition:max-height 0.35s cubic-bezier(0.32,0.72,0,1);
+  max-height:260px; /* 展開狀態 */
 }
 .panel-handle{
   width:36px;height:4px;background:var(--border);
-  border-radius:2px;margin:10px auto 0;cursor:pointer;
+  border-radius:2px;margin:10px auto 0;cursor:pointer;flex-shrink:0;
 }
+.panel-inner{padding:0 14px 14px;}
 .map-rec-title{
   display:flex;align-items:center;gap:8px;
   font-size:12px;font-weight:700;color:var(--text2);
-  padding:10px 0 8px;
+  padding:9px 14px 8px;
   cursor:pointer;
+  flex-shrink:0;
 }
 .map-rec-title .rec-live{
   display:flex;align-items:center;gap:4px;
@@ -128,7 +131,8 @@ body{display:flex;flex-direction:column;}
   border-radius:20px;padding:2px 8px;
   font-size:10px;font-weight:700;color:var(--red);margin-left:auto;
 }
-.map-rec-panel.collapsed{transform:translateY(calc(100% - 50px));}
+/* 收合：只露出 handle(14px) + title(38px) = 52px */
+.map-rec-panel.collapsed{max-height:52px;}
 .rec-cards-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
 .rec-cards-row::-webkit-scrollbar{display:none;}
 
@@ -293,7 +297,7 @@ body{display:flex;flex-direction:column;}
   .detail.open{transform:translateX(0);}
   .detail-inner{width:100%!important;}
   .mobtabs{display:flex!important;}
-  .map-rec-panel{bottom:0;left:0;right:0;border-radius:20px 20px 0 0;}
+  .map-rec-panel{bottom:0;left:0;right:0;border-radius:20px 20px 0 0;max-height:240px;}
 }
 .mobtabs{display:none;position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--white);border-top:1.5px solid var(--border);z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,0.07);}
 .mobt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);cursor:pointer;font-size:10px;font-weight:600;border:none;background:none;}
@@ -432,10 +436,12 @@ body{display:flex;flex-direction:column;}
       <div class="panel-handle" onclick="toggleRecPanel()"></div>
       <div class="map-rec-title" onclick="toggleRecPanel()">
         🤖 AI 人流分散推薦
-        <span id="panel-arrow" style="font-size:14px;margin-left:4px;transition:transform 0.3s;">▼</span>
+        <span id="panel-arrow" style="font-size:11px;margin-left:2px;transition:transform 0.35s;display:inline-block;">▲</span>
         <div class="rec-live"><div class="live-dot"></div> LIVE</div>
       </div>
-      <div class="rec-cards-row" id="rec-cards-row"></div>
+      <div class="panel-inner">
+        <div class="rec-cards-row" id="rec-cards-row"></div>
+      </div>
     </div>
   </div>
 
@@ -681,10 +687,10 @@ function toggleRecPanel(){
   const arrow = document.getElementById('panel-arrow');
   if(recPanelOpen){
     panel.classList.remove('collapsed');
-    if(arrow)arrow.style.transform='rotate(0deg)';
+    if(arrow){ arrow.textContent='▲'; arrow.style.transform='rotate(0deg)'; }
   } else {
     panel.classList.add('collapsed');
-    if(arrow)arrow.style.transform='rotate(180deg)';
+    if(arrow){ arrow.textContent='▼'; arrow.style.transform='rotate(0deg)'; }
   }
 }
 
