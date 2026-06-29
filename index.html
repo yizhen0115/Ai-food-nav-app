@@ -104,16 +104,23 @@ body{display:flex;flex-direction:column;}
 
 /* ===== 地圖人流分散推薦面板 ===== */
 .map-rec-panel{
-  position:absolute;bottom:16px;left:14px;right:14px;z-index:10;
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:16px;padding:12px 14px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.12);
-  transition:all 0.3s;
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+  background:var(--white);
+  border-top:1.5px solid var(--border);
+  border-radius:20px 20px 0 0;
+  padding:0 14px 12px;
+  box-shadow:0 -3px 16px rgba(0,0,0,0.09);
+  transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+.panel-handle{
+  width:36px;height:4px;background:var(--border);
+  border-radius:2px;margin:10px auto 0;cursor:pointer;
 }
 .map-rec-title{
   display:flex;align-items:center;gap:8px;
   font-size:12px;font-weight:700;color:var(--text2);
-  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;
+  padding:10px 0 8px;
+  cursor:pointer;
 }
 .map-rec-title .rec-live{
   display:flex;align-items:center;gap:4px;
@@ -121,44 +128,45 @@ body{display:flex;flex-direction:column;}
   border-radius:20px;padding:2px 8px;
   font-size:10px;font-weight:700;color:var(--red);margin-left:auto;
 }
+.map-rec-panel.collapsed{transform:translateY(calc(100% - 50px));}
 .rec-cards-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
 .rec-cards-row::-webkit-scrollbar{display:none;}
 
 /* 推薦卡片 */
 .rec-card{
-  flex-shrink:0;width:160px;
+  flex-shrink:0;width:155px;
   background:var(--surface);border:1.5px solid var(--border);
-  border-radius:13px;padding:10px 11px;cursor:pointer;
-  transition:all 0.15s;position:relative;
+  border-radius:14px;padding:11px 12px 10px;cursor:pointer;
+  transition:all 0.15s;position:relative;overflow:hidden;
 }
-.rec-card:hover{border-color:var(--accent);background:var(--abg);}
+.rec-card:active{transform:scale(0.97);}
 .rec-card.top-pick{border-color:var(--accent);background:var(--abg);}
 .rec-top-badge{
-  position:absolute;top:-8px;left:10px;
+  display:inline-flex;align-items:center;gap:3px;
   background:var(--accent);color:#fff;
-  font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;
-  white-space:nowrap;
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;
+  margin-bottom:7px;
 }
-.rec-card-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;}
-.rec-card-cat{font-size:10px;color:var(--text2);margin-bottom:5px;}
+.rec-card-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rec-card-cat{font-size:10px;color:var(--text2);margin-bottom:6px;}
 .rec-card-wait{
-  font-size:20px;font-weight:900;
-  line-height:1;margin-bottom:2px;
+  font-size:22px;font-weight:900;
+  line-height:1;margin-bottom:1px;
 }
-.rec-card-lbl{font-size:10px;color:var(--text3);}
+.rec-card-lbl{font-size:9px;color:var(--text3);}
 .rec-card-crowd{
-  margin-top:6px;height:4px;background:var(--border);
+  margin-top:5px;height:3px;background:var(--border);
   border-radius:2px;overflow:hidden;
 }
 .rec-card-crowd-fill{height:100%;border-radius:2px;transition:width 0.5s;}
-.rec-card-btns{display:flex;gap:5px;margin-top:8px;}
+.rec-card-btns{display:flex;gap:5px;margin-top:9px;}
 .rec-mini-btn{
-  flex:1;padding:6px 3px;border-radius:8px;border:none;
+  flex:1;padding:7px 3px;border-radius:9px;border:none;
   font-size:11px;font-weight:700;cursor:pointer;text-align:center;
 }
 .rec-mini-btn:active{transform:scale(0.96);}
 .rmbblue{background:var(--blue);color:#fff;}
-.rmbout{background:var(--white);color:var(--blue);border:1px solid var(--blue);}
+.rmbout{background:var(--white);color:var(--blue);border:1px solid #bfdbfe;}
 
 /* ===== DETAIL PANEL ===== */
 .detail{width:0;flex-shrink:0;background:var(--white);border-left:0 solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:width 0.3s ease,border-left-width 0.3s ease;z-index:15;}
@@ -285,7 +293,7 @@ body{display:flex;flex-direction:column;}
   .detail.open{transform:translateX(0);}
   .detail-inner{width:100%!important;}
   .mobtabs{display:flex!important;}
-  .map-rec-panel{bottom:8px;left:8px;right:8px;}
+  .map-rec-panel{bottom:0;left:0;right:0;border-radius:20px 20px 0 0;}
 }
 .mobtabs{display:none;position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--white);border-top:1.5px solid var(--border);z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,0.07);}
 .mobt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);cursor:pointer;font-size:10px;font-weight:600;border:none;background:none;}
@@ -293,19 +301,33 @@ body{display:flex;flex-direction:column;}
 .mobt.active{color:var(--blue);}
 
 /* Leaflet 地圖標記卡片 */
-.leaflet-tooltip-own{background:#fff!important;border:1.5px solid var(--border)!important;border-radius:13px!important;padding:10px 12px!important;box-shadow:0 4px 14px rgba(0,0,0,0.12)!important;font-family:-apple-system,sans-serif!important;color:var(--text)!important;white-space:normal!important;pointer-events:auto!important;}
+.leaflet-tooltip-own{
+  background:#fff!important;
+  border:2px solid var(--border)!important;
+  border-radius:12px!important;
+  padding:8px 11px!important;
+  box-shadow:0 3px 12px rgba(0,0,0,0.13)!important;
+  font-family:-apple-system,sans-serif!important;
+  color:var(--text)!important;
+  white-space:normal!important;
+  pointer-events:auto!important;
+  transition:box-shadow 0.15s!important;
+}
 .leaflet-tooltip-own::before{display:none!important;}
-.tt-card{width:178px;}
-.tt-hd{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
-.tt-title{font-size:13px;font-weight:800;color:var(--text);}
-.tt-meta{font-size:10px;color:var(--text2);margin-bottom:4px;line-height:1.4;}
-.tt-status{font-size:10px;font-weight:700;display:inline-block;padding:2px 6px;border-radius:4px;margin-bottom:6px;}
-.tt-crowd{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:7px;}
+.tt-card{width:148px;}
+.tt-hd{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.tt-ico{font-size:18px;flex-shrink:0;}
+.tt-title{font-size:12px;font-weight:800;color:var(--text);line-height:1.2;}
+.tt-status{font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;margin-bottom:7px;}
+.tt-wait{font-size:18px;font-weight:900;line-height:1;color:var(--text);}
+.tt-wait-unit{font-size:10px;color:var(--text3);font-weight:600;}
+.tt-crowd{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:5px 0 7px;}
 .tt-crowd-fill{height:100%;border-radius:2px;}
 .tt-btn-row{display:flex;gap:5px;}
-.tt-btn{flex:1;padding:6px 0;font-size:11px;font-weight:700;border:none;border-radius:6px;cursor:pointer;}
+.tt-btn{flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity 0.15s;}
+.tt-btn:active{opacity:0.8;}
 .tt-btn-b{background:var(--blue);color:#fff;}
-.tt-btn-o{background:var(--surface);color:var(--blue);border:1px solid var(--blue);}
+.tt-btn-o{background:var(--surface);color:var(--blue);border:1px solid #bfdbfe;}
 .leaflet-routing-container{display:none!important;}
 </style>
 </head>
@@ -407,8 +429,10 @@ body{display:flex;flex-direction:column;}
 
     <!-- ===== 人流分散推薦面板 ===== -->
     <div class="map-rec-panel" id="map-rec-panel">
-      <div class="map-rec-title">
+      <div class="panel-handle" onclick="toggleRecPanel()"></div>
+      <div class="map-rec-title" onclick="toggleRecPanel()">
         🤖 AI 人流分散推薦
+        <span id="panel-arrow" style="font-size:14px;margin-left:4px;transition:transform 0.3s;">▼</span>
         <div class="rec-live"><div class="live-dot"></div> LIVE</div>
       </div>
       <div class="rec-cards-row" id="rec-cards-row"></div>
@@ -578,22 +602,26 @@ function initMap(){
     const c=r.status==='open'?'#1a9e6e':r.status==='busy'?'#d97706':'#ef4444';
     const sbg=r.status==='open'?'var(--abg)':r.status==='busy'?'var(--ybg)':'var(--rbg)';
     const sbd=r.status==='open'?'var(--abd)':r.status==='busy'?'#fde68a':'#fca5a5';
-    const wt=r.wait===0?'立即入座':r.wait+'分';
     const crowdPct=r.occ;
     const crowdClr=crowdPct>79?'#ef4444':crowdPct>49?'#f97316':'#1a9e6e';
 
     const invisible=L.divIcon({html:'',iconSize:[0,0],className:''});
     const m=L.marker([r.lat,r.lng],{icon:invisible}).addTo(map);
 
+    const wt2=r.wait===0?'立即入座':r.wait+'分';
     const content=`
       <div class="tt-card">
-        <div class="tt-hd"><span style="font-size:16px;">${r.emoji}</span><span class="tt-title">${r.name}</span></div>
-        <div class="tt-meta">⭐${r.rating} · ${r.cat}<br>📍 距您 ${r.dist}m · 💰${r.price}</div>
-        <div class="tt-status" style="background:${sbg};color:${c};border:1px solid ${sbd};">${SL[r.status]} · ⏱ ${wt}</div>
+        <div class="tt-hd">
+          <span class="tt-ico">${r.emoji}</span>
+          <span class="tt-title">${r.name}</span>
+        </div>
+        <div class="tt-status" style="background:${sbg};color:${c};border:1px solid ${sbd};">
+          ${SL[r.status]} · ⏱ ${wt2}
+        </div>
         <div class="tt-crowd"><div class="tt-crowd-fill" style="width:${crowdPct}%;background:${crowdClr};"></div></div>
         <div class="tt-btn-row">
           <button onclick="startNav(${r.id})" class="tt-btn tt-btn-b">🧭 導航</button>
-          <button onclick="openDetail(${r.id})" class="tt-btn tt-btn-o">📋 詳情</button>
+          <button onclick="openDetail(${r.id})" class="tt-btn tt-btn-o">詳情</button>
         </div>
       </div>`;
 
@@ -643,6 +671,21 @@ function renderRecPanel(){
   }).join('');
 
   document.getElementById('rec-cards-row').innerHTML = html;
+}
+
+// ===== 推薦面板收合 =====
+let recPanelOpen = true;
+function toggleRecPanel(){
+  recPanelOpen = !recPanelOpen;
+  const panel = document.getElementById('map-rec-panel');
+  const arrow = document.getElementById('panel-arrow');
+  if(recPanelOpen){
+    panel.classList.remove('collapsed');
+    if(arrow)arrow.style.transform='rotate(0deg)';
+  } else {
+    panel.classList.add('collapsed');
+    if(arrow)arrow.style.transform='rotate(180deg)';
+  }
 }
 
 // ===== 導航 =====
