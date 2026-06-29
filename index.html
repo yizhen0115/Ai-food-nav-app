@@ -217,7 +217,7 @@ body{display:flex;flex-direction:column;}
   box-shadow:0 -4px 20px rgba(0,0,0,0.08);
   overflow:hidden;
   transition:max-height 0.38s cubic-bezier(0.32,0.72,0,1);
-  max-height:170px;
+  max-height:190px;
 }
 .rec-panel.closed{max-height:46px;}
 
@@ -250,7 +250,7 @@ body{display:flex;flex-direction:column;}
 /* 卡片橫向滾動區 */
 .rec-scroll{
   display:flex;gap:8px;overflow-x:auto;
-  padding:0 14px 12px;scrollbar-width:none;
+  padding:0 14px 14px;scrollbar-width:none;
   align-items:stretch;
 }
 .rec-scroll::-webkit-scrollbar{display:none;}
@@ -258,29 +258,26 @@ body{display:flex;flex-direction:column;}
 /* ── 推薦卡片（水平緊湊版）── */
 .rcard{
   flex-shrink:0;
-  display:flex;align-items:center;gap:10px;
+  display:flex;flex-direction:column;
   background:var(--white);border:1.5px solid var(--border);
-  border-radius:13px;padding:8px 10px;cursor:pointer;
+  border-radius:13px;padding:9px 11px;cursor:pointer;
   transition:all 0.18s;box-shadow:var(--shadow-sm);
-  position:relative;width:200px;
-  overflow:hidden;
+  width:220px;overflow:hidden;
 }
+.rcard-content{display:flex;align-items:center;gap:10px;}
 .rcard:active{transform:scale(0.97);}
 .rcard.top{border-color:var(--accent);background:linear-gradient(135deg,#f0fdf4 0%,#fff 60%);}
-.rcard.top::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--accent),#16a34a);border-radius:13px 0 0 13px;
-}
 .rcard-badge{
-  position:absolute;top:-8px;left:10px;
+  display:inline-flex;align-items:center;gap:3px;
   background:linear-gradient(135deg,var(--accent),#16a34a);
   color:#fff;font-size:9px;font-weight:700;
   padding:2px 8px;border-radius:20px;white-space:nowrap;
-  box-shadow:0 2px 6px rgba(5,150,105,0.3);
+  box-shadow:0 1px 4px rgba(5,150,105,0.25);
+  margin-bottom:5px;align-self:flex-start;
 }
 
 /* 左側：icon + 文字 */
-.rcard-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.rcard-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden;}
 .rcard-ico{
   width:36px;height:36px;border-radius:10px;
   background:var(--surface);border:1px solid var(--border);
@@ -288,8 +285,8 @@ body{display:flex;flex-direction:column;}
   font-size:18px;flex-shrink:0;
 }
 .rcard-text{flex:1;min-width:0;}
-.rcard-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rcard-cat{font-size:10px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rcard-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
+.rcard-cat{font-size:10px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
 .rcard-occ-row{display:flex;align-items:center;gap:4px;margin-top:4px;}
 .rcard-occ-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
 .rcard-occ-fill{height:100%;border-radius:2px;}
@@ -817,25 +814,27 @@ function renderRec(){
     const topMargin = isTop?'margin-top:6px;':'';
     return`<div class="rcard${isTop?' top':''}" onclick="openDetail(${r.id})">
       ${isTop?'<div class="rcard-badge">🤖 AI 首推</div>':''}
-      <div class="rcard-left" style="${topMargin}">
-        <div class="rcard-ico">${r.emoji}</div>
-        <div class="rcard-text">
-          <div class="rcard-name">${r.name}</div>
-          <div class="rcard-cat">${r.cat} · 📍${r.dist}m</div>
-          <div class="rcard-occ-row">
-            <div class="rcard-occ-bar"><div class="rcard-occ-fill" style="width:${r.occ}%;background:${clr};"></div></div>
-            <span class="rcard-occ-pct">${r.occ}%</span>
+      <div class="rcard-content">
+        <div class="rcard-left">
+          <div class="rcard-ico">${r.emoji}</div>
+          <div class="rcard-text">
+            <div class="rcard-name">${r.name}</div>
+            <div class="rcard-cat">${r.cat} · 📍${r.dist}m</div>
+            <div class="rcard-occ-row">
+              <div class="rcard-occ-bar"><div class="rcard-occ-fill" style="width:${r.occ}%;background:${clr};"></div></div>
+              <span class="rcard-occ-pct">${r.occ}%</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="rcard-right" style="${topMargin}">
-        <div class="rcard-wait-block">
-          <div class="rcard-wait" style="color:${waitClr};">${waitNum}</div>
-          <div class="rcard-wait-lbl">${waitLbl}</div>
-        </div>
-        <div class="rcard-btns">
-          <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭</button>
-          <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
+        <div class="rcard-right">
+          <div class="rcard-wait-block">
+            <div class="rcard-wait" style="color:${waitClr};">${waitNum}</div>
+            <div class="rcard-wait-lbl">${waitLbl}</div>
+          </div>
+          <div class="rcard-btns">
+            <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭</button>
+            <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
+          </div>
         </div>
       </div>
     </div>`;
