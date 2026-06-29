@@ -3,340 +3,550 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI 智慧餐飲調度導航</title>
+<title>AI 智慧餐飲導航</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;}
 input{user-select:text;-webkit-user-select:text;}
 :root{
-  --white:#fff;--bg:#f4f6fa;--surface:#f8f9fc;--border:#e4e8f0;
-  --text:#1a1f36;--text2:#5a6383;--text3:#9aa0b8;
-  --accent:#1a9e6e;--abg:#e6f7f1;--abd:#a8dfc8;
-  --blue:#2563eb;--bbg:#eff6ff;
-  --red:#ef4444;--rbg:#fef2f2;
+  --white:#ffffff;
+  --bg:#f0f4f8;
+  --surface:#f7f9fc;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --accent:#059669;--abg:#ecfdf5;--abd:#6ee7b7;
+  --blue:#2563eb;--bbg:#eff6ff;--blue2:#1d4ed8;
+  --red:#dc2626;--rbg:#fef2f2;
   --yellow:#d97706;--ybg:#fffbeb;
-  --orange:#f97316;--obg:#fff7ed;
+  --orange:#ea580c;--obg:#fff7ed;
   --purple:#7c3aed;--pbg:#f5f3ff;
-  --nav-h:60px;
+  --nav-h:58px;
+  --sidebar-w:360px;
+  --radius:16px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 16px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.06);
 }
+
 html,body{height:100%;overflow:hidden;font-family:-apple-system,'Segoe UI','Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);}
 body{display:flex;flex-direction:column;}
 
-/* TOP NAV */
-.topnav{height:var(--nav-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:50;box-shadow:0 1px 6px rgba(0,0,0,0.06);}
-.brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--text);white-space:nowrap;flex-shrink:0;}
-.brand-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1a9e6e,#2563eb);display:flex;align-items:center;justify-content:center;font-size:16px;}
-.nav-search{flex:1;max-width:380px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:7px 13px;}
+/* ── TOP NAV ── */
+.topnav{
+  height:var(--nav-h);background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  flex-shrink:0;z-index:100;
+  box-shadow:var(--shadow-sm);
+}
+.brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:var(--text);white-space:nowrap;flex-shrink:0;letter-spacing:-0.3px;}
+.brand-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#059669 0%,#2563eb 100%);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 2px 8px rgba(5,150,105,0.35);
+}
+.nav-search{
+  flex:1;max-width:360px;
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:12px;padding:7px 12px;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.nav-search:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
 .nav-search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;user-select:text;}
 .nav-search input::placeholder{color:var(--text3);}
-.nav-tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:3px;margin-left:auto;}
-.ntab{padding:6px 13px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--text2);transition:all 0.15s;white-space:nowrap;}
-.ntab.active{background:var(--accent);color:#fff;}
-.live-pill{display:flex;align-items:center;gap:5px;background:var(--rbg);border:1px solid #fca5a5;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--red);flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s infinite;}
-.hbg{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;flex-shrink:0;}
+.nav-filters{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-left:auto;}
+.nf{padding:5px 12px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:none;color:var(--text2);transition:all 0.15s;white-space:nowrap;}
+.nf.on{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(5,150,105,0.3);}
+.live-badge{
+  display:flex;align-items:center;gap:5px;
+  background:var(--rbg);border:1px solid #fca5a5;
+  border-radius:20px;padding:5px 11px;
+  font-size:11px;font-weight:700;color:var(--red);flex-shrink:0;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite;}
+.hbg{display:none;background:none;border:none;cursor:pointer;color:var(--text2);padding:6px;flex-shrink:0;border-radius:8px;transition:background 0.15s;}
+.hbg:hover{background:var(--surface);}
 .hbg svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;}
 
-/* MAIN */
+/* ── MAIN LAYOUT ── */
 .main{flex:1;display:flex;overflow:hidden;position:relative;}
 
-/* SIDEBAR */
-.sidebar{width:360px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;z-index:10;}
-.stabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
-.stab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
-.stab.active{color:var(--blue);border-bottom-color:var(--blue);}
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;z-index:10;
+}
+.stabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 12px;}
+.stab{
+  flex:1;padding:12px 4px 11px;text-align:center;
+  font-size:12px;font-weight:700;color:var(--text3);
+  cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;
+  transition:all 0.18s;
+}
+.stab.on{color:var(--blue);border-bottom-color:var(--blue);}
 .spage{display:none;flex-direction:column;flex:1;overflow:hidden;}
-.spage.active{display:flex;}
-.slist-header{padding:10px 14px 7px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;}
+.spage.on{display:flex;}
+
+/* Sort chips */
+.sort-wrap{padding:10px 14px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
 .chips::-webkit-scrollbar{display:none;}
-.chip{padding:4px 11px;border-radius:20px;flex-shrink:0;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--text2);transition:all 0.15s;}
-.chip.active{background:var(--bbg);border-color:var(--blue);color:var(--blue);}
-.sscroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.chip{
+  padding:5px 12px;border-radius:20px;flex-shrink:0;
+  font-size:12px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--white);color:var(--text2);
+  transition:all 0.15s;
+}
+.chip.on{background:var(--bbg);border-color:var(--blue);color:var(--blue);}
+.sscroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0 12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 .sscroll::-webkit-scrollbar{width:3px;}
 .sscroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-/* MY PAGE */
-.myscroll{flex:1;overflow-y:auto;padding:14px;scrollbar-width:none;}
-.myscroll::-webkit-scrollbar{display:none;}
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.sbox{background:var(--white);border:1.5px solid var(--border);border-radius:13px;padding:13px 6px;text-align:center;}
-.sv{font-size:24px;font-weight:900;}.sl{font-size:10px;color:var(--text3);margin-top:2px;}
-.mysec{margin-bottom:18px;}
-.mysec-t{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:9px;}
-.mycard{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:border-color 0.15s;}
-.mycard:hover{border-color:var(--blue);}
-.mycard-ico{width:42px;height:42px;border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.mycard-info{flex:1;min-width:0;}
-.mycard-name{font-size:13px;font-weight:700;color:var(--text);}
-.mycard-sub{font-size:11px;color:var(--text2);margin-top:2px;}
-.mycard-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
-.prog-sm{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;}
-.prog-sm-fill{height:100%;border-radius:2px;background:var(--accent);}
-
-/* RESTO CARDS */
-.rc{margin:7px 10px;background:var(--white);border-radius:13px;border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
-.rc:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(37,99,235,0.1);}
-.rc-top{display:flex;align-items:flex-start;gap:10px;padding:10px 12px 8px;}
-.rc-img{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);}
+/* ── RESTO CARD (sidebar) ── */
+.rc{
+  margin:5px 10px;background:var(--white);border-radius:14px;
+  border:1.5px solid var(--border);overflow:hidden;cursor:pointer;
+  transition:all 0.18s;box-shadow:var(--shadow-sm);
+}
+.rc:hover{border-color:var(--blue);box-shadow:0 4px 14px rgba(37,99,235,0.12);transform:translateY(-1px);}
+.rc-row{display:flex;align-items:center;gap:11px;padding:11px 13px 10px;}
+.rc-ico{
+  width:46px;height:46px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);
+}
 .rc-info{flex:1;min-width:0;}
-.rc-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rc-cat{font-size:11px;color:var(--text2);margin-top:2px;}
-.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.rc-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;}
+.rc-meta{font-size:11px;color:var(--text2);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.rc-wait{
+  font-size:18px;font-weight:900;line-height:1;
+  flex-shrink:0;text-align:right;min-width:44px;
+}
+.rc-wait-lbl{font-size:9px;color:var(--text3);font-weight:600;text-align:right;}
+.rc-bar{height:3px;background:var(--surface);overflow:hidden;border-top:1px solid var(--border);}
+.rc-bar-fill{height:100%;transition:width 0.5s;}
+
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
 .bo{background:var(--abg);color:var(--accent);border:1px solid var(--abd);}
 .bb{background:var(--ybg);color:var(--yellow);border:1px solid #fde68a;}
 .bf{background:var(--rbg);color:var(--red);border:1px solid #fca5a5;}
 
-/* MAP */
+/* ── MY PAGE ── */
+.myscroll{flex:1;overflow-y:auto;scrollbar-width:none;}
+.myscroll::-webkit-scrollbar{display:none;}
+.my-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;}
+.msbox{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:14px 8px;text-align:center;
+  box-shadow:var(--shadow-sm);
+}
+.msv{font-size:26px;font-weight:900;line-height:1;}.msl{font-size:10px;color:var(--text3);margin-top:3px;font-weight:600;}
+.my-sec{padding:0 12px;margin-bottom:16px;}
+.my-sec-t{
+  font-size:11px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:0.06em;
+  padding:8px 2px 6px;
+}
+.mycard{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:13px;padding:11px 12px;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  transition:all 0.15s;box-shadow:var(--shadow-sm);
+}
+.mycard:hover{border-color:var(--blue);transform:translateY(-1px);}
+.mycard-ico{width:40px;height:40px;border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.mycard-name{font-size:13px;font-weight:700;color:var(--text);}
+.mycard-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.mycard-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+.prog-sm{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;}
+.prog-sm-fill{height:100%;border-radius:2px;background:var(--accent);}
+
+/* ── MAP ── */
 .map-area{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;z-index:1;touch-action:none;}
-.map-ctrl{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px;z-index:10;}
-.mb{width:40px;height:40px;border-radius:11px;background:var(--white);border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.15s;}
-.mb:hover{border-color:var(--blue);}
 
-/* NAV BAR */
-.navbar{position:absolute;top:14px;left:14px;right:62px;background:var(--white);border:2px solid var(--blue);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:10;box-shadow:0 6px 20px rgba(37,99,235,0.18);transform:translateY(-140%);transition:transform 0.3s;}
+/* Map controls */
+.map-ctrl{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;z-index:10;}
+.mb{
+  width:40px;height:40px;border-radius:12px;
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);
+  border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-size:17px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow);transition:all 0.15s;
+}
+.mb:hover{border-color:var(--blue);transform:scale(1.05);}
+.mb:active{transform:scale(0.95);}
+
+/* Nav bar */
+.navbar{
+  position:absolute;top:12px;left:12px;right:60px;
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);
+  border:2px solid var(--blue);border-radius:16px;
+  padding:11px 14px;display:flex;align-items:center;gap:10px;z-index:10;
+  box-shadow:0 8px 24px rgba(37,99,235,0.18);
+  transform:translateY(-160%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+}
 .navbar.show{transform:translateY(0);}
-.nav-arrow-box{width:40px;height:40px;border-radius:50%;background:var(--bbg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.navstop{padding:7px 13px;border-radius:8px;border:1px solid #fca5a5;background:var(--rbg);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.nav-arrow{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,0.3);
+}
+.nav-stop{
+  padding:7px 12px;border-radius:9px;
+  border:1.5px solid #fca5a5;background:var(--rbg);color:var(--red);
+  font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;transition:all 0.15s;
+}
+.nav-stop:hover{background:#fee2e2;}
 
-/* ===== 地圖人流分散推薦面板 ===== */
-.map-rec-panel{
+/* ── AI 推薦面板 ── */
+.rec-panel{
   position:absolute;bottom:0;left:0;right:0;z-index:10;
-  background:var(--white);
-  border-top:1.5px solid var(--border);
-  border-radius:20px 20px 0 0;
-  box-shadow:0 -3px 16px rgba(0,0,0,0.09);
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);border-radius:22px 22px 0 0;
+  box-shadow:0 -6px 24px rgba(0,0,0,0.1);
   overflow:hidden;
-  transition:max-height 0.35s cubic-bezier(0.32,0.72,0,1);
-  max-height:260px; /* 展開狀態 */
+  max-height:240px;
+  transition:max-height 0.38s cubic-bezier(0.32,0.72,0,1);
 }
-.panel-handle{
-  width:36px;height:4px;background:var(--border);
-  border-radius:2px;margin:10px auto 0;cursor:pointer;flex-shrink:0;
+.rec-panel.closed{max-height:50px;}
+.rec-handle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 0;cursor:pointer;flex-shrink:0;
 }
-.panel-inner{padding:0 14px 14px;}
-.map-rec-title{
+.rec-handle-bar{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto;}
+.rec-header{
   display:flex;align-items:center;gap:8px;
-  font-size:12px;font-weight:700;color:var(--text2);
-  padding:9px 14px 8px;
-  cursor:pointer;
+  padding:8px 16px 8px;cursor:pointer;
+}
+.rec-header-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;}
+.rec-header-sub{font-size:11px;color:var(--text2);margin-left:2px;}
+.rec-toggle{
+  margin-left:auto;width:28px;height:28px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--text2);cursor:pointer;transition:all 0.3s;
   flex-shrink:0;
 }
-.map-rec-title .rec-live{
+.rec-panel.closed .rec-toggle{transform:rotate(180deg);}
+.rec-live-pill{
   display:flex;align-items:center;gap:4px;
   background:var(--rbg);border:1px solid #fca5a5;
   border-radius:20px;padding:2px 8px;
-  font-size:10px;font-weight:700;color:var(--red);margin-left:auto;
+  font-size:10px;font-weight:700;color:var(--red);flex-shrink:0;
 }
-/* 收合：只露出 handle(14px) + title(38px) = 52px */
-.map-rec-panel.collapsed{max-height:52px;}
-.rec-cards-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
-.rec-cards-row::-webkit-scrollbar{display:none;}
+.rec-scroll{display:flex;gap:9px;overflow-x:auto;padding:2px 16px 14px;scrollbar-width:none;}
+.rec-scroll::-webkit-scrollbar{display:none;}
 
 /* 推薦卡片 */
-.rec-card{
-  flex-shrink:0;width:155px;
-  background:var(--surface);border:1.5px solid var(--border);
-  border-radius:14px;padding:11px 12px 10px;cursor:pointer;
-  transition:all 0.15s;position:relative;overflow:hidden;
+.rcard{
+  flex-shrink:0;width:152px;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:11px 12px;cursor:pointer;
+  transition:all 0.18s;box-shadow:var(--shadow-sm);
+  position:relative;overflow:visible;
 }
-.rec-card:active{transform:scale(0.97);}
-.rec-card.top-pick{border-color:var(--accent);background:var(--abg);}
-.rec-top-badge{
-  display:inline-flex;align-items:center;gap:3px;
-  background:var(--accent);color:#fff;
-  font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;
-  margin-bottom:7px;
+.rcard:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(5,150,105,0.14);transform:translateY(-2px);}
+.rcard:active{transform:scale(0.97);}
+.rcard.top{border-color:var(--accent);background:linear-gradient(145deg,#f0fdf4,#fff);}
+.rcard-badge{
+  position:absolute;top:-9px;left:10px;
+  background:linear-gradient(135deg,var(--accent),#16a34a);
+  color:#fff;font-size:10px;font-weight:700;
+  padding:2px 9px;border-radius:20px;white-space:nowrap;
+  box-shadow:0 2px 6px rgba(5,150,105,0.3);
 }
-.rec-card-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rec-card-cat{font-size:10px;color:var(--text2);margin-bottom:6px;}
-.rec-card-wait{
-  font-size:22px;font-weight:900;
-  line-height:1;margin-bottom:1px;
-}
-.rec-card-lbl{font-size:9px;color:var(--text3);}
-.rec-card-crowd{
-  margin-top:5px;height:3px;background:var(--border);
-  border-radius:2px;overflow:hidden;
-}
-.rec-card-crowd-fill{height:100%;border-radius:2px;transition:width 0.5s;}
-.rec-card-btns{display:flex;gap:5px;margin-top:9px;}
-.rec-mini-btn{
-  flex:1;padding:7px 3px;border-radius:9px;border:none;
-  font-size:11px;font-weight:700;cursor:pointer;text-align:center;
-}
-.rec-mini-btn:active{transform:scale(0.96);}
-.rmbblue{background:var(--blue);color:#fff;}
-.rmbout{background:var(--white);color:var(--blue);border:1px solid #bfdbfe;}
+.rcard-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.rcard-ico{font-size:20px;line-height:1;}
+.rcard-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rcard-cat{font-size:10px;color:var(--text3);margin-top:1px;}
+.rcard-wait{font-size:22px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
+.rcard-wait-lbl{font-size:10px;color:var(--text3);font-weight:600;margin-top:1px;}
+.rcard-occ-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:7px 0;}
+.rcard-occ-fill{height:100%;border-radius:2px;transition:width 0.5s;}
+.rcard-btns{display:flex;gap:5px;margin-top:6px;}
+.rbtn{flex:1;padding:7px 3px;border-radius:9px;border:none;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
+.rbtn:active{transform:scale(0.96);}
+.rbtn-blue{background:var(--blue);color:#fff;}
+.rbtn-blue:hover{background:var(--blue2);}
+.rbtn-out{background:var(--surface);color:var(--blue);border:1px solid #bfdbfe;}
+.rbtn-out:hover{background:var(--bbg);}
 
-/* ===== DETAIL PANEL ===== */
-.detail{width:0;flex-shrink:0;background:var(--white);border-left:0 solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:width 0.3s ease,border-left-width 0.3s ease;z-index:15;}
+/* ── DETAIL PANEL ── */
+.detail{
+  width:0;flex-shrink:0;background:var(--white);
+  border-left:0px solid var(--border);
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:width 0.3s ease,border-left-width 0.3s ease;z-index:15;
+}
 .detail.open{width:380px;border-left-width:1.5px;}
-.detail-inner{width:380px;overflow-y:auto;flex:1;padding:16px 16px 32px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
-.detail-inner::-webkit-scrollbar{width:3px;}
-.detail-inner::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.detail-scroll{width:380px;overflow-y:auto;flex:1;padding:16px 16px 32px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.detail-scroll::-webkit-scrollbar{width:3px;}
+.detail-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-/* Detail内容 */
-.dp-hd{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
-.dp-emoji{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--surface);border:1px solid var(--border);flex-shrink:0;}
-.dp-name{font-size:19px;font-weight:900;color:var(--text);margin-bottom:2px;}
-.dp-sub{font-size:12px;color:var(--text2);line-height:1.5;margin-top:1px;}
-.dprow{display:flex;gap:8px;margin-bottom:8px;}
-.dpbtn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;text-align:center;transition:all 0.15s;}
-.dpbtn:active{transform:scale(0.98);}
-.dprow .dpbtn{margin-bottom:0;}
-.dpbtn-blue{background:var(--blue);color:#fff;}
-.dpbtn-outline{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);}
-.dpbtn-green{background:var(--accent);color:#fff;}
-.dpbtn-gray{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+/* Detail 頂部 */
+.detail-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 0;margin-bottom:14px;
+}
+.detail-close{
+  width:30px;height:30px;border-radius:50%;background:var(--surface);
+  border:1px solid var(--border);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;color:var(--text2);
+  transition:all 0.15s;
+}
+.detail-close:hover{background:var(--rbg);color:var(--red);}
 
-.cwrap{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;}
-.cwrap-t{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
-.cbars{display:flex;align-items:flex-end;gap:3px;height:55px;}
+/* Hero card */
+.d-hero{
+  background:linear-gradient(135deg,var(--surface),var(--white));
+  border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:14px;margin-bottom:12px;
+  display:flex;gap:13px;align-items:flex-start;
+}
+.d-ico{
+  width:64px;height:64px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;background:var(--white);border:1.5px solid var(--border);
+  flex-shrink:0;box-shadow:var(--shadow-sm);
+}
+.d-name{font-size:18px;font-weight:900;color:var(--text);letter-spacing:-0.4px;margin-bottom:4px;}
+.d-status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:5px;}
+.d-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* Action buttons */
+.d-actions{display:flex;gap:8px;margin-bottom:12px;}
+.dab{
+  flex:1;padding:12px 8px;border-radius:12px;border:none;
+  font-size:13px;font-weight:700;cursor:pointer;text-align:center;
+  transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.dab:active{transform:scale(0.97);}
+.dab-blue{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 3px 10px rgba(37,99,235,0.25);}
+.dab-blue:hover{box-shadow:0 5px 16px rgba(37,99,235,0.35);}
+.dab-green{background:linear-gradient(135deg,var(--accent),#16a34a);color:#fff;box-shadow:0 3px 10px rgba(5,150,105,0.25);}
+.dab-green:hover{box-shadow:0 5px 16px rgba(5,150,105,0.35);}
+.dab-out{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);}
+.dab-out:hover{background:var(--bbg);}
+
+/* Inner tabs */
+.d-itabs{display:flex;background:var(--surface);border-radius:12px;padding:3px;margin-bottom:13px;border:1px solid var(--border);}
+.d-itab{flex:1;padding:8px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;border-radius:9px;transition:all 0.18s;}
+.d-itab.on{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
+.icontent{display:none;}.icontent.on{display:block;}
+
+/* Stat grid */
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.sbox{background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:11px 6px;text-align:center;}
+.sbox.rb{background:var(--rbg);border-color:#fca5a5;}
+.sbox.gb{background:var(--abg);border-color:var(--abd);}
+.sbox.bb{background:var(--bbg);border-color:#bfdbfe;}
+.sbox-v{font-size:20px;font-weight:900;margin:3px 0;}
+.sbox-l{font-size:9px;color:var(--text3);font-weight:600;}
+
+/* Seat map */
+.seat-map{background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:12px;margin-bottom:12px;}
+.seat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:8px 0;}
+.seat{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.seat.used{background:var(--rbg);color:var(--red);border:1.5px solid #fca5a5;}
+.seat.soon{background:var(--obg);color:var(--orange);border:1.5px solid #fdba74;}
+.seat.free{background:var(--abg);color:var(--accent);border:1.5px solid var(--abd);}
+.seat-legend{display:flex;gap:12px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);}
+.leg-dot{width:8px;height:8px;border-radius:3px;}
+
+/* Block wrapper */
+.block{background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:13px;margin-bottom:12px;}
+.block-t{font-size:13px;font-weight:800;color:var(--text);margin-bottom:9px;display:flex;align-items:center;gap:6px;letter-spacing:-0.2px;}
+
+/* Chart */
+.cbars{display:flex;align-items:flex-end;gap:3px;height:56px;}
 .cbc{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
 .cb{width:100%;border-radius:3px 3px 0 0;}
 .cl{font-size:8px;color:var(--text3);}
 
-/* ===== 建議抵達時間核心元件 ===== */
-.eta-arrive-card{
-  background:linear-gradient(135deg, #e6f7f1, #eff6ff);
-  border:2px solid var(--abd);
-  border-radius:16px;padding:16px;margin-bottom:12px;
-  position:relative;overflow:hidden;
+/* ── ETA CARD ── */
+.eta-card{
+  background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);
+  border:2px solid var(--abd);border-radius:16px;
+  padding:15px;margin-bottom:12px;position:relative;overflow:hidden;
 }
-.eta-arrive-card::before{
-  content:'';position:absolute;top:-30px;right:-30px;
-  width:100px;height:100px;
-  background:radial-gradient(circle,rgba(26,158,110,0.15),transparent 70%);
-  border-radius:50%;
+.eta-card::after{
+  content:'';position:absolute;top:-24px;right:-24px;
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,rgba(5,150,105,0.18),transparent 70%);
 }
-.eta-arrive-header{
-  display:flex;align-items:center;gap:6px;
-  font-size:11px;font-weight:700;color:var(--accent);
-  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;
+.eta-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;
 }
-.eta-arrive-header .eta-live-tag{
+.eta-mode-pill{
   background:var(--accent);color:#fff;
-  font-size:9px;padding:2px 6px;border-radius:4px;margin-left:auto;
+  font-size:9px;padding:2px 7px;border-radius:4px;margin-left:4px;
 }
-.eta-time-big{
-  font-size:36px;font-weight:900;color:var(--accent);
-  line-height:1;margin-bottom:4px;
-}
-.eta-time-range{
-  font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;
-}
-.eta-sub-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:12px;}
+.eta-time{font-size:38px;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-1px;margin-bottom:3px;}
+.eta-range{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.eta-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:12px;}
 
-/* ETA 連動計算步驟 */
-.eta-steps-row{
-  display:flex;align-items:stretch;
-  background:var(--white);border-radius:11px;
-  border:1px solid var(--border);overflow:hidden;margin-bottom:12px;
-}
-.eta-step-box{
-  flex:1;padding:10px 6px;text-align:center;
-  border-right:1px solid var(--border);
-}
-.eta-step-box:last-child{border-right:none;}
-.eta-step-ico{font-size:16px;margin-bottom:3px;}
-.eta-step-val{font-size:13px;font-weight:800;color:var(--text);}
-.eta-step-lbl{font-size:9px;color:var(--text3);margin-top:1px;}
+.eta-steps{display:flex;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9);border-radius:12px;overflow:hidden;margin-bottom:11px;}
+.estep{flex:1;padding:9px 4px;text-align:center;border-right:1px solid var(--border);}
+.estep:last-child{border-right:none;}
+.estep-ico{font-size:14px;margin-bottom:3px;}
+.estep-val{font-size:12px;font-weight:800;color:var(--text);}
+.estep-lbl{font-size:9px;color:var(--text3);margin-top:1px;}
 
-/* 人流分散建議條 */
-.crowd-advice-bar{
+.crowd-bar{
   display:flex;align-items:center;gap:8px;
-  background:var(--white);border:1px solid var(--border);
-  border-radius:10px;padding:9px 11px;margin-bottom:12px;
-  font-size:12px;color:var(--text2);
+  background:rgba(255,255,255,0.8);border:1px solid var(--border);
+  border-radius:10px;padding:8px 11px;margin-bottom:11px;
 }
-.crowd-advice-dot{
-  width:10px;height:10px;border-radius:50%;flex-shrink:0;
-}
-.nav-cta-btn{
+.crowd-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.crowd-txt{font-size:11px;color:var(--text2);line-height:1.4;}
+
+.nav-cta{
   width:100%;padding:13px;border-radius:12px;border:none;
-  background:var(--blue);color:#fff;font-size:15px;font-weight:700;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:#fff;font-size:14px;font-weight:700;
   cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:all 0.15s;box-shadow:0 4px 12px rgba(37,99,235,0.25);
+  box-shadow:0 4px 14px rgba(37,99,235,0.3);transition:all 0.18s;
 }
-.nav-cta-btn:active{transform:scale(0.98);}
-.nav-cta-btn.nav-active{background:#16a34a;box-shadow:0 4px 12px rgba(22,163,74,0.25);}
+.nav-cta:hover{box-shadow:0 6px 20px rgba(37,99,235,0.4);}
+.nav-cta:active{transform:scale(0.98);}
+.nav-cta.active-nav{background:linear-gradient(135deg,#16a34a,var(--accent));box-shadow:0 4px 14px rgba(5,150,105,0.3);}
 
-/* 評分拆解 */
-.rating-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:12px;color:var(--text2);}
+/* Queue items */
+.qi{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);}
+.qi:last-child{border-bottom:none;}
+.qnum{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+.qme{background:linear-gradient(135deg,var(--accent),#16a34a);color:#fff;}
+.qot{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+.qtag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.tagm{background:var(--bbg);color:var(--blue);}
+.tags{background:var(--abg);color:var(--accent);}
+.tagw{background:var(--ybg);color:var(--yellow);}
+
+/* Tags, menu, reviews */
 .tag-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
-.f-tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--bg);color:var(--text2);border:1px solid var(--border);}
-.food-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed var(--border);}
+.f-tag{font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+.food-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border);}
 .food-item:last-child{border-bottom:none;}
+.food-name{font-size:13px;font-weight:600;color:var(--text);}
 .food-p{font-size:13px;font-weight:800;color:var(--orange);}
-.food-order-btn{font-size:11px;padding:3px 8px;border-radius:5px;background:var(--bbg);color:var(--blue);border:1px solid #bfdbfe;cursor:pointer;}
-.review-item{padding:8px 0;border-bottom:1px solid var(--border);}
-.review-item:last-child{border-bottom:none;}
+.food-btn{font-size:11px;padding:4px 10px;border-radius:7px;background:var(--bbg);color:var(--blue);border:1px solid #bfdbfe;cursor:pointer;font-weight:600;transition:all 0.15s;}
+.food-btn:hover{background:var(--blue);color:#fff;}
+.rev-item{padding:9px 0;border-bottom:1px solid var(--border);}
+.rev-item:last-child{border-bottom:none;}
 .rev-hd{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:3px;}
-.rev-txt{font-size:12px;color:var(--text);line-height:1.4;}
+.rev-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.rating-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:12px;color:var(--text2);}
 
-/* TOAST */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;color:#fff;z-index:9999;white-space:nowrap;opacity:0;transition:all 0.25s;pointer-events:none;}
+/* Notice bar */
+.notice{
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+  background:var(--bbg);border:1px solid #bfdbfe;
+  border-radius:11px;padding:9px 12px;margin-bottom:12px;
+  font-size:12px;color:var(--blue);
+}
+.nbtn{
+  padding:4px 11px;border-radius:7px;border:none;
+  background:var(--blue);color:#fff;font-size:11px;font-weight:700;
+  cursor:pointer;margin-left:auto;transition:all 0.15s;
+}
+.nbtn:hover{background:var(--blue2);}
+
+/* AI rec */
+.airec{background:var(--pbg);border:1.5px solid #c4b5fd;border-radius:13px;padding:12px;margin-bottom:12px;}
+.airec-t{font-size:12px;font-weight:700;color:var(--purple);margin-bottom:8px;}
+
+/* Announce */
+.announce{background:var(--obg);border:1.5px solid #fed7aa;border-radius:13px;padding:12px;margin-bottom:12px;}
+.announce-t{font-size:12px;font-weight:700;color:var(--orange);margin-bottom:4px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:rgba(15,23,42,0.9);backdrop-filter:blur(8px);
+  border-radius:12px;padding:9px 18px;
+  font-size:13px;font-weight:600;color:#fff;
+  z-index:9999;white-space:nowrap;opacity:0;
+  transition:all 0.25s;pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* MOBILE */
-@media(max-width:900px){.sidebar{width:300px;}}
+/* ── MOBILE ── */
+@media(max-width:900px){:root{--sidebar-w:300px;}}
 @media(max-width:700px){
   .main{margin-bottom:62px;}
   .sidebar{position:fixed;top:var(--nav-h);bottom:62px;left:0;transform:translateX(-100%);width:100%!important;z-index:200;transition:transform 0.3s;border-right:none;}
   .sidebar.mopen{transform:translateX(0);}
   .hbg{display:flex;}
-  .nav-tabs{display:none;}
+  .nav-filters{display:none;}
   .brand span{display:none;}
-  .live-pill span{display:none;}
+  .live-badge span{display:none;}
   .nav-search{max-width:none;}
   .detail{position:fixed!important;top:var(--nav-h);bottom:62px;right:0;width:100%!important;z-index:195;transform:translateX(100%);transition:transform 0.3s;border-left:none!important;}
   .detail.open{transform:translateX(0);}
-  .detail-inner{width:100%!important;}
+  .detail-scroll{width:100%!important;}
   .mobtabs{display:flex!important;}
-  .map-rec-panel{bottom:0;left:0;right:0;border-radius:20px 20px 0 0;max-height:240px;}
 }
-.mobtabs{display:none;position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--white);border-top:1.5px solid var(--border);z-index:300;box-shadow:0 -2px 10px rgba(0,0,0,0.07);}
-.mobt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);cursor:pointer;font-size:10px;font-weight:600;border:none;background:none;}
+.mobtabs{
+  display:none;position:fixed;bottom:0;left:0;right:0;height:62px;
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);z-index:300;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.08);
+}
+.mobt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text3);cursor:pointer;font-size:10px;font-weight:600;border:none;background:none;transition:color 0.15s;}
 .mobt svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;}
-.mobt.active{color:var(--blue);}
+.mobt.on{color:var(--blue);}
 
-/* Leaflet 地圖標記卡片 */
+/* Leaflet map cards */
 .leaflet-tooltip-own{
-  background:#fff!important;
-  border:2px solid var(--border)!important;
-  border-radius:12px!important;
-  padding:8px 11px!important;
-  box-shadow:0 3px 12px rgba(0,0,0,0.13)!important;
+  background:rgba(255,255,255,0.97)!important;
+  backdrop-filter:blur(8px)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:14px!important;padding:10px 12px!important;
+  box-shadow:var(--shadow-lg)!important;
   font-family:-apple-system,sans-serif!important;
-  color:var(--text)!important;
-  white-space:normal!important;
+  color:var(--text)!important;white-space:normal!important;
   pointer-events:auto!important;
-  transition:box-shadow 0.15s!important;
 }
 .leaflet-tooltip-own::before{display:none!important;}
-.tt-card{width:148px;}
-.tt-hd{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
-.tt-ico{font-size:18px;flex-shrink:0;}
-.tt-title{font-size:12px;font-weight:800;color:var(--text);line-height:1.2;}
-.tt-status{font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;margin-bottom:7px;}
-.tt-wait{font-size:18px;font-weight:900;line-height:1;color:var(--text);}
-.tt-wait-unit{font-size:10px;color:var(--text3);font-weight:600;}
-.tt-crowd{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:5px 0 7px;}
-.tt-crowd-fill{height:100%;border-radius:2px;}
-.tt-btn-row{display:flex;gap:5px;}
-.tt-btn{flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity 0.15s;}
-.tt-btn:active{opacity:0.8;}
-.tt-btn-b{background:var(--blue);color:#fff;}
-.tt-btn-o{background:var(--surface);color:var(--blue);border:1px solid #bfdbfe;}
+.tt-card{width:152px;}
+.tt-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.tt-ico{font-size:17px;line-height:1;}
+.tt-name{font-size:12px;font-weight:800;color:var(--text);}
+.tt-status{font-size:10px;font-weight:700;display:inline-block;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
+.tt-row{display:flex;align-items:baseline;gap:4px;margin-bottom:2px;}
+.tt-wait{font-size:20px;font-weight:900;line-height:1;}
+.tt-wait-lbl{font-size:10px;color:var(--text3);font-weight:600;}
+.tt-occ{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:6px 0;}
+.tt-occ-fill{height:100%;border-radius:2px;}
+.tt-btns{display:flex;gap:5px;margin-top:7px;}
+.tt-btn{flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:all 0.15s;}
+.tt-btn:active{transform:scale(0.95);}
+.tt-b{background:var(--blue);color:#fff;}
+.tt-b:hover{background:var(--blue2);}
+.tt-o{background:var(--surface);color:var(--blue);border:1px solid #bfdbfe;}
+.tt-o:hover{background:var(--bbg);}
 .leaflet-routing-container{display:none!important;}
 </style>
 </head>
 <body>
 
+<!-- TOP NAV -->
 <nav class="topnav">
   <button class="hbg" onclick="toggleSidebar()">
     <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -349,43 +559,48 @@ body{display:flex;flex-direction:column;}
     <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--text3)" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" id="search-input" placeholder="搜尋餐廳、招牌料理…">
   </div>
-  <div class="nav-tabs">
-    <button class="ntab active" onclick="setFilter('all',this)">全部</button>
-    <button class="ntab" onclick="setFilter('open',this)">位子充足</button>
-    <button class="ntab" onclick="setFilter('busy',this)">等候中</button>
-    <button class="ntab" onclick="setFilter('full',this)">客滿</button>
+  <div class="nav-filters">
+    <button class="nf on" onclick="setFilter('all',this)">全部</button>
+    <button class="nf" onclick="setFilter('open',this)">位子充足</button>
+    <button class="nf" onclick="setFilter('busy',this)">等候中</button>
+    <button class="nf" onclick="setFilter('full',this)">客滿</button>
   </div>
-  <div class="live-pill"><div class="live-dot"></div><span>即時更新</span></div>
+  <div class="live-badge"><div class="live-dot"></div><span>即時更新</span></div>
 </nav>
 
 <div class="main">
+  <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="stabs">
-      <div class="stab active" id="stab-list" onclick="switchSTab('list')">🗺 附近餐廳</div>
+      <div class="stab on" id="stab-list" onclick="switchSTab('list')">🗺 附近餐廳</div>
       <div class="stab" id="stab-my" onclick="switchSTab('my')">👤 我的</div>
     </div>
-    <div class="spage active" id="sp-list">
-      <div class="slist-header">
+
+    <!-- LIST PAGE -->
+    <div class="spage on" id="sp-list">
+      <div class="sort-wrap">
         <div class="chips" id="sort-chips">
-          <div class="chip active" onclick="setSort('wait',this)">等候最短</div>
-          <div class="chip" onclick="setSort('rating',this)">評分最高</div>
-          <div class="chip" onclick="setSort('dist',this)">距離最近</div>
+          <div class="chip on" onclick="setSort('wait',this)">⏱ 等候最短</div>
+          <div class="chip" onclick="setSort('rating',this)">⭐ 評分最高</div>
+          <div class="chip" onclick="setSort('dist',this)">📍 距離最近</div>
         </div>
       </div>
       <div class="sscroll" id="card-list"></div>
     </div>
+
+    <!-- MY PAGE -->
     <div class="spage" id="sp-my">
       <div class="myscroll">
-        <div class="stat-row">
-          <div class="sbox"><div class="sv" style="color:var(--accent);">4</div><div class="sl">我的收藏</div></div>
-          <div class="sbox"><div class="sv" style="color:var(--blue);">2</div><div class="sl">訂位紀錄</div></div>
-          <div class="sbox"><div class="sv" style="color:var(--yellow);">6</div><div class="sl">候位次數</div></div>
+        <div class="my-stat-row">
+          <div class="msbox"><div class="msv" style="color:var(--accent);">4</div><div class="msl">我的收藏</div></div>
+          <div class="msbox"><div class="msv" style="color:var(--blue);">2</div><div class="msl">訂位紀錄</div></div>
+          <div class="msbox"><div class="msv" style="color:var(--yellow);">6</div><div class="msl">候位次數</div></div>
         </div>
-        <div class="mysec">
-          <div class="mysec-t">🔔 目前候位中</div>
+        <div class="my-sec">
+          <div class="my-sec-t">🔔 目前候位中</div>
           <div class="mycard" onclick="openDetail(1)">
             <div class="mycard-ico">🍱</div>
-            <div class="mycard-info">
+            <div style="flex:1;min-width:0;">
               <div class="mycard-name">暖食堂</div>
               <div class="mycard-sub">候位組 #2 · 預估 8 分鐘後入座</div>
               <div class="prog-sm"><div class="prog-sm-fill" style="width:40%;"></div></div>
@@ -393,20 +608,20 @@ body{display:flex;flex-direction:column;}
             <div class="mycard-tag" style="background:var(--abg);color:var(--accent);border:1px solid var(--abd);">等候中</div>
           </div>
         </div>
-        <div class="mysec">
-          <div class="mysec-t">📅 訂位紀錄</div>
+        <div class="my-sec">
+          <div class="my-sec-t">📅 訂位紀錄</div>
           <div class="mycard" onclick="openDetail(4)">
             <div class="mycard-ico">🥩</div>
-            <div class="mycard-info">
+            <div style="flex:1;min-width:0;">
               <div class="mycard-name">南國燒肉屋</div>
               <div class="mycard-sub">2026/06/30 · 19:00 · 4人桌</div>
-              <div class="mycard-sub" style="color:var(--accent);margin-top:2px;">✓ 已確認</div>
+              <div class="mycard-sub" style="color:var(--accent);margin-top:2px;">✓ 已確認訂位</div>
             </div>
             <div class="mycard-tag" style="background:var(--abg);color:var(--accent);border:1px solid var(--abd);">已確認</div>
           </div>
         </div>
-        <div class="mysec">
-          <div class="mysec-t">❤️ 我的收藏</div>
+        <div class="my-sec">
+          <div class="my-sec-t">❤️ 我的收藏</div>
           <div id="fav-list"></div>
         </div>
       </div>
@@ -416,44 +631,50 @@ body{display:flex;flex-direction:column;}
   <!-- MAP -->
   <div class="map-area">
     <div id="map"></div>
-    <!-- 導航條 -->
+
+    <!-- Nav bar -->
     <div class="navbar" id="navb">
-      <div class="nav-arrow-box" id="nav-arrow">⬆️</div>
+      <div class="nav-arrow" id="nav-arrow">⬆️</div>
       <div style="flex:1;">
-        <div id="nav-main" style="font-size:14px;font-weight:800;color:var(--text);">路線規劃中…</div>
+        <div id="nav-main" style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">路線規劃中…</div>
         <div id="nav-sub" style="font-size:11px;color:var(--text2);margin-top:2px;"></div>
       </div>
-      <button class="navstop" onclick="stopNav()">結束導航</button>
-    </div>
-    <!-- 地圖右上角控制 -->
-    <div class="map-ctrl">
-      <button class="mb" onclick="locateMe()">📍</button>
-      <button class="mb" id="layer-btn" onclick="toggleLayer()">🌙</button>
+      <button class="nav-stop" onclick="stopNav()">結束</button>
     </div>
 
-    <!-- ===== 人流分散推薦面板 ===== -->
-    <div class="map-rec-panel" id="map-rec-panel">
-      <div class="panel-handle" onclick="toggleRecPanel()"></div>
-      <div class="map-rec-title" onclick="toggleRecPanel()">
-        🤖 AI 人流分散推薦
-        <span id="panel-arrow" style="font-size:11px;margin-left:2px;transition:transform 0.35s;display:inline-block;">▲</span>
-        <div class="rec-live"><div class="live-dot"></div> LIVE</div>
+    <!-- Map controls -->
+    <div class="map-ctrl">
+      <button class="mb" onclick="locateMe()" title="定位">📍</button>
+      <button class="mb" id="layer-btn" onclick="toggleLayer()" title="切換地圖">🌙</button>
+    </div>
+
+    <!-- AI 推薦面板 -->
+    <div class="rec-panel" id="rec-panel">
+      <div class="rec-handle-row" onclick="toggleRec()">
+        <div class="rec-handle-bar"></div>
       </div>
-      <div class="panel-inner">
-        <div class="rec-cards-row" id="rec-cards-row"></div>
+      <div class="rec-header" onclick="toggleRec()">
+        <span style="font-size:16px;">🤖</span>
+        <div>
+          <span class="rec-header-title">AI 人流分散推薦</span>
+          <span class="rec-header-sub">· 依等候與佔用率智慧排序</span>
+        </div>
+        <div class="rec-live-pill"><div class="live-dot"></div>LIVE</div>
+        <div class="rec-toggle" id="rec-toggle">▲</div>
       </div>
+      <div class="rec-scroll" id="rec-scroll"></div>
     </div>
   </div>
 
-  <!-- DETAIL PANEL -->
+  <!-- DETAIL -->
   <div class="detail" id="detail">
-    <div class="detail-inner" id="detail-inner"></div>
+    <div class="detail-scroll" id="detail-scroll"></div>
   </div>
 </div>
 
 <!-- Mobile tabs -->
 <div class="mobtabs">
-  <button class="mobt active" id="mobt-map" onclick="mTab('map')">
+  <button class="mobt on" id="mobt-map" onclick="mTab('map')">
     <svg viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>地圖
   </button>
   <button class="mobt" id="mobt-list" onclick="mTab('list')">
@@ -470,129 +691,50 @@ body{display:flex;flex-direction:column;}
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== 資料 =====
+// ── DATA ──
 const R=[
-  {
-    id:1,name:'暖食堂',cat:'台式家常料理',emoji:'🍱',price:'$80–$150',
-    lat:22.7298,lng:120.3085,dist:150,rating:4.6,reviews:834,
-    wait:8,su:7,st:10,occ:70,turn:20,status:'busy',
-    hours:'11:00–20:30',addr:'高雄市小港區松和路12號',queue:8,qg:0.6,
-    tags:['提供外帶','附設冷氣','親子友善','停車方便'],
-    scores:{food:4.7,service:4.5,env:4.4,cp:4.8},
-    announcement:'📢 端午連假正常營業！今日打卡即送手工冷泡茶乙瓶。',
-    menu:[{n:'招牌阿嬤滷肉飯',p:55},{n:'黑豬肉手工水餃(10顆)',p:70},{n:'剝皮辣椒雞湯',p:90}],
-    comments:[{u:'林*豪',s:'⭐⭐⭐⭐⭐',t:'滷肉飯肥而不膩，雞湯香辣夠味！'},{u:'陳*婷',s:'⭐⭐⭐⭐',t:'出餐速度快，服務人員很親切。'}],
-    peak:[2,4,5,4,2,1,1,3,4,4,2,1]
-  },
-  {
-    id:2,name:'丰味拉麵',cat:'日式拉麵',emoji:'🍜',price:'$120–$200',
-    lat:22.7275,lng:120.3105,dist:280,rating:4.5,reviews:612,
-    wait:5,su:4,st:12,occ:33,turn:18,status:'open',
-    hours:'11:30–21:30',addr:'高雄市小港區高餐路45號',queue:3,qg:0.3,
-    tags:['只收現金','無限免費加麵','免費WiFi'],
-    scores:{food:4.6,service:4.2,env:4.5,cp:4.4},
-    announcement:'📢 本月限定：極濃豚骨黑蒜拉麵限時開賣！',
-    menu:[{n:'特濃豚骨豚肉拉麵',p:180},{n:'地獄麻辣拉麵',p:195},{n:'日式唐揚雞',p:80}],
-    comments:[{u:'佐藤*',s:'⭐⭐⭐⭐⭐',t:'湯頭非常道地日本味，硬麵配濃湯完美！'}],
-    peak:[1,2,3,4,3,2,1,3,4,4,3,1]
-  },
-  {
-    id:3,name:'港都牛肉麵',cat:'台式麵食',emoji:'🥣',price:'$90–$150',
-    lat:22.7268,lng:120.3078,dist:380,rating:4.3,reviews:445,
-    wait:12,su:8,st:10,occ:80,turn:22,status:'busy',
-    hours:'10:00–20:00',addr:'高雄市小港區中山四路2-1號',queue:10,qg:0.7,
-    tags:['附設停車場','可刷卡','冷氣開放'],
-    scores:{food:4.4,service:4.0,env:4.1,cp:4.6},
-    announcement:'📢 酸菜全新升級！歡迎內用無限續加。',
-    menu:[{n:'紅燒牛肉厚切麵',p:140},{n:'清燉牛筋細麵',p:160},{n:'招牌滷味拼盤',p:65}],
-    comments:[{u:'張*華',s:'⭐⭐⭐⭐',t:'牛肉非常大塊且軟嫩，湯頭濃郁。'}],
-    peak:[3,5,5,3,2,1,1,2,4,4,2,1]
-  },
-  {
-    id:4,name:'南國燒肉屋',cat:'日式燒肉',emoji:'🥩',price:'$350–$700',
-    lat:22.7310,lng:120.3112,dist:460,rating:4.8,reviews:1203,
-    wait:30,su:10,st:10,occ:100,turn:40,status:'full',
-    hours:'17:00–23:00',addr:'高雄市小港區松鼠路88號',queue:22,qg:1.1,
-    tags:['支援LINE Pay','適合聚餐','附設包廂'],
-    scores:{food:4.9,service:4.8,env:4.7,cp:4.2},
-    announcement:'📢 當月壽星出示證件即贈「特選和牛橫膈膜」乙份！',
-    menu:[{n:'特選安格斯牛拼盤',p:680},{n:'極上厚切牛舌',p:280},{n:'海鮮雙拼',p:320}],
-    comments:[{u:'W*ng',s:'⭐⭐⭐⭐⭐',t:'專人代烤服務超級到位，肉質沒話說，慶生首選。'}],
-    peak:[0,0,0,0,0,0,2,4,5,5,4,2]
-  },
-  {
-    id:5,name:'椰香南洋食堂',cat:'東南亞料理',emoji:'🍛',price:'$100–$180',
-    lat:22.7290,lng:120.3068,dist:320,rating:4.2,reviews:298,
-    wait:0,su:3,st:14,occ:21,turn:20,status:'open',
-    hours:'11:00–21:00',addr:'高雄市小港區漢民路33號',queue:0,qg:0.1,
-    tags:['素食選項','辣度可調','外帶優惠'],
-    scores:{food:4.3,service:4.1,env:4.0,cp:4.7},
-    announcement:'📢 今日特推：打拋豬飯買一送一！',
-    menu:[{n:'打拋豬飯',p:110},{n:'椰漿咖哩雞',p:130},{n:'月亮蝦餅',p:80}],
-    comments:[{u:'小*如',s:'⭐⭐⭐⭐',t:'打拋豬超好吃，辣度剛剛好！'}],
-    peak:[1,2,3,2,1,1,1,2,3,3,2,1]
-  },
+  {id:1,name:'暖食堂',cat:'台式家常料理',emoji:'🍱',price:'$80–$150',lat:22.7298,lng:120.3085,dist:150,rating:4.6,reviews:834,wait:8,su:7,st:10,occ:70,turn:20,status:'busy',hours:'11:00–20:30',addr:'高雄市小港區松和路12號',queue:8,qg:0.6,tags:['提供外帶','附設冷氣','親子友善','停車方便'],scores:{food:4.7,service:4.5,env:4.4,cp:4.8},announcement:'📢 端午連假正常營業！今日打卡即送手工冷泡茶乙瓶。',menu:[{n:'招牌阿嬤滷肉飯',p:55},{n:'黑豬肉手工水餃(10顆)',p:70},{n:'剝皮辣椒雞湯',p:90}],comments:[{u:'林*豪',s:'⭐⭐⭐⭐⭐',t:'滷肉飯肥而不膩，雞湯香辣夠味！'},{u:'陳*婷',s:'⭐⭐⭐⭐',t:'出餐速度快，服務人員很親切。'}],peak:[2,4,5,4,2,1,1,3,4,4,2,1]},
+  {id:2,name:'丰味拉麵',cat:'日式拉麵',emoji:'🍜',price:'$120–$200',lat:22.7275,lng:120.3105,dist:280,rating:4.5,reviews:612,wait:5,su:4,st:12,occ:33,turn:18,status:'open',hours:'11:30–21:30',addr:'高雄市小港區高餐路45號',queue:3,qg:0.3,tags:['只收現金','無限免費加麵','免費WiFi'],scores:{food:4.6,service:4.2,env:4.5,cp:4.4},announcement:'📢 本月限定：極濃豚骨黑蒜拉麵限時開賣！',menu:[{n:'特濃豚骨豚肉拉麵',p:180},{n:'地獄麻辣拉麵',p:195},{n:'日式唐揚雞',p:80}],comments:[{u:'佐藤*',s:'⭐⭐⭐⭐⭐',t:'湯頭非常道地日本味，硬麵配濃湯完美！'}],peak:[1,2,3,4,3,2,1,3,4,4,3,1]},
+  {id:3,name:'港都牛肉麵',cat:'台式麵食',emoji:'🥣',price:'$90–$150',lat:22.7268,lng:120.3078,dist:380,rating:4.3,reviews:445,wait:12,su:8,st:10,occ:80,turn:22,status:'busy',hours:'10:00–20:00',addr:'高雄市小港區中山四路2-1號',queue:10,qg:0.7,tags:['附設停車場','可刷卡','冷氣開放'],scores:{food:4.4,service:4.0,env:4.1,cp:4.6},announcement:'📢 酸菜全新升級！歡迎內用無限續加。',menu:[{n:'紅燒牛肉厚切麵',p:140},{n:'清燉牛筋細麵',p:160},{n:'招牌滷味拼盤',p:65}],comments:[{u:'張*華',s:'⭐⭐⭐⭐',t:'牛肉非常大塊且軟嫩，湯頭濃郁。'}],peak:[3,5,5,3,2,1,1,2,4,4,2,1]},
+  {id:4,name:'南國燒肉屋',cat:'日式燒肉',emoji:'🥩',price:'$350–$700',lat:22.7310,lng:120.3112,dist:460,rating:4.8,reviews:1203,wait:30,su:10,st:10,occ:100,turn:40,status:'full',hours:'17:00–23:00',addr:'高雄市小港區松鼠路88號',queue:22,qg:1.1,tags:['支援LINE Pay','適合聚餐','附設包廂'],scores:{food:4.9,service:4.8,env:4.7,cp:4.2},announcement:'📢 當月壽星出示證件即贈「特選和牛橫膈膜」乙份！',menu:[{n:'特選安格斯牛拼盤',p:680},{n:'極上厚切牛舌',p:280},{n:'海鮮雙拼',p:320}],comments:[{u:'W*ng',s:'⭐⭐⭐⭐⭐',t:'專人代烤服務超級到位，肉質沒話說，慶生首選。'}],peak:[0,0,0,0,0,0,2,4,5,5,4,2]},
+  {id:5,name:'椰香南洋食堂',cat:'東南亞料理',emoji:'🍛',price:'$100–$180',lat:22.7290,lng:120.3068,dist:320,rating:4.2,reviews:298,wait:0,su:3,st:14,occ:21,turn:20,status:'open',hours:'11:00–21:00',addr:'高雄市小港區漢民路33號',queue:0,qg:0.1,tags:['素食選項','辣度可調','外帶優惠'],scores:{food:4.3,service:4.1,env:4.0,cp:4.7},announcement:'📢 今日特推：打拋豬飯買一送一！',menu:[{n:'打拋豬飯',p:110},{n:'椰漿咖哩雞',p:130},{n:'月亮蝦餅',p:80}],comments:[{u:'小*如',s:'⭐⭐⭐⭐',t:'打拋豬超好吃，辣度剛剛好！'}],peak:[1,2,3,2,1,1,1,2,3,3,2,1]},
 ];
 const PH=['11','12','13','14','15','16','17','18','19','20','21','22'];
 const SL={open:'位子充足',busy:'等候中',full:'客滿'};
 const BC={open:'bo',busy:'bb',full:'bf'};
 const SC={open:'var(--accent)',busy:'var(--yellow)',full:'var(--red)'};
 
-let map=null,routingControl=null,routeLine=null;
+let map=null,rc=null,rl=null;
 let uLat=22.7285,uLng=120.3092;
 let selId=null;
 let cF='all',cS='wait';
 let useDark=false,lL,lD;
 let favs=new Set([2]);
-// 導航狀態：記錄目前正在導航的餐廳 id 和真實路程資料
 let navState={active:false,id:null,distKm:null,timeMin:null};
+let recOpen=true;
 
+// ── TOAST ──
 let tT;
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2400);}
 
-// ===== 時間工具：計算「現在 + N 分鐘」的時刻字串 =====
-function addMins(mins){
-  const d=new Date();d.setMinutes(d.getMinutes()+Math.round(mins));
-  return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+// ── TIME CALC ──
+function addMins(m){const d=new Date();d.setMinutes(d.getMinutes()+Math.round(m));return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
+
+function calcETA(r){
+  const walk=Math.max(1,Math.round(r.dist/80));
+  const travel=(navState.active&&navState.id===r.id&&navState.timeMin)?navState.timeMin:walk;
+  const wait=r.wait;
+  let depart,arrWait,hint;
+  if(travel>=wait){depart=0;arrWait=Math.max(0,wait-travel);hint='現在出發最剛好！抵達後幾乎不用等。';}
+  else{depart=wait-travel;arrWait=0;hint=`再等 ${depart} 分鐘後出發，抵達即可入座！`;}
+  const best=addMins(depart+travel);
+  const latest=addMins(depart+travel+10);
+  const depStr=depart===0?'現在':addMins(depart);
+  const src=(navState.active&&navState.id===r.id&&navState.distKm)?`（導航實測 ${navState.distKm} 公里）`:`（估算 ${r.dist}m 步行）`;
+  return{walk,travel,wait,depart,arrWait,best,latest,depStr,hint,src};
 }
 
-// ===== 核心：為某餐廳計算建議抵達時間 =====
-// 邏輯：
-//   walk   = 步行時間（dist / 80公尺每分鐘）
-//   queue  = 目前餐廳等候時間
-//   如果 walk >= queue → 你走到的時候剛好有位，建議「現在出發」
-//   如果 walk < queue  → 提早去沒有意義，建議「再等 (queue-walk) 分後出發」
-//   導航完成後用真實路程時間替換步行估算
-function calcArrival(r){
-  const walkMins = Math.max(1, Math.round(r.dist / 80));
-  // 若目前有導航資料且是同一家餐廳，用真實時間
-  const travelMins = (navState.active && navState.id===r.id && navState.timeMin)
-    ? navState.timeMin : walkMins;
-  const waitMins = r.wait;
-
-  let departIn, arrivalWait, suggestion;
-  if(travelMins >= waitMins){
-    // 走路路上等候自然消化，到了就能入座
-    departIn = 0;
-    arrivalWait = Math.max(0, waitMins - travelMins);
-    suggestion = '現在出發最剛好！抵達後幾乎不用等。';
-  } else {
-    // 建議晚一點出發，讓等候時間繼續消化
-    departIn = waitMins - travelMins;
-    arrivalWait = 0;
-    suggestion = `再等 ${departIn} 分鐘後出發，抵達即可入座！`;
-  }
-
-  const bestArrival = addMins(departIn + travelMins);
-  const latestArrival = addMins(departIn + travelMins + 10);
-  const departTime = departIn===0 ? '現在' : addMins(departIn);
-  const navSource = (navState.active && navState.id===r.id && navState.distKm)
-    ? `（導航實測 ${navState.distKm} 公里）` : `（估算 ${r.dist} 公尺步行）`;
-
-  return {walkMins,travelMins,waitMins,departIn,arrivalWait,bestArrival,latestArrival,departTime,suggestion,navSource};
-}
-
-// ===== 地圖初始化 =====
+// ── MAP INIT ──
 function initMap(){
   if(typeof L==='undefined')return;
   map=L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,touchZoom:true,dragging:true}).setView([uLat,uLng],16);
@@ -600,368 +742,315 @@ function initMap(){
   lD=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19});
   lL.addTo(map);
 
-  const ui=L.divIcon({html:'<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 10px rgba(37,99,235,0.5);"></div>',iconSize:[18,18],iconAnchor:[9,9],className:''});
-  L.marker([uLat,uLng],{icon:ui}).addTo(map).bindPopup('<b style="color:#1a1f36">📍 您的位置（高餐大）</b>');
+  // User dot
+  const uIcon=L.divIcon({html:'<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,0.5);"></div>',iconSize:[18,18],iconAnchor:[9,9],className:''});
+  L.marker([uLat,uLng],{icon:uIcon}).addTo(map).bindPopup('<b style="color:#0f172a">📍 您的位置（高餐大）</b>');
 
-  // 地圖餐廳標記（永久 tooltip 可互動）
+  // Restaurant markers
   R.forEach(r=>{
-    const c=r.status==='open'?'#1a9e6e':r.status==='busy'?'#d97706':'#ef4444';
+    const c=r.status==='open'?'#059669':r.status==='busy'?'#d97706':'#dc2626';
     const sbg=r.status==='open'?'var(--abg)':r.status==='busy'?'var(--ybg)':'var(--rbg)';
     const sbd=r.status==='open'?'var(--abd)':r.status==='busy'?'#fde68a':'#fca5a5';
-    const crowdPct=r.occ;
-    const crowdClr=crowdPct>79?'#ef4444':crowdPct>49?'#f97316':'#1a9e6e';
+    const wt=r.wait===0?'立即入座':r.wait+'分';
+    const oclr=r.occ>79?'#dc2626':r.occ>49?'#ea580c':'#059669';
 
-    const invisible=L.divIcon({html:'',iconSize:[0,0],className:''});
-    const m=L.marker([r.lat,r.lng],{icon:invisible}).addTo(map);
-
-    const wt2=r.wait===0?'立即入座':r.wait+'分';
-    const content=`
+    const inv=L.divIcon({html:'',iconSize:[0,0],className:''});
+    const m=L.marker([r.lat,r.lng],{icon:inv}).addTo(map);
+    m.bindTooltip(`
       <div class="tt-card">
-        <div class="tt-hd">
-          <span class="tt-ico">${r.emoji}</span>
-          <span class="tt-title">${r.name}</span>
+        <div class="tt-head"><span class="tt-ico">${r.emoji}</span><span class="tt-name">${r.name}</span></div>
+        <div class="tt-status" style="background:${sbg};color:${c};border:1px solid ${sbd};">${SL[r.status]} · ⏱ ${wt}</div>
+        <div class="tt-row"><span class="tt-wait" style="color:${c};">${r.wait===0?'0':r.wait}</span><span class="tt-wait-lbl">分鐘等候</span></div>
+        <div class="tt-occ"><div class="tt-occ-fill" style="width:${r.occ}%;background:${oclr};"></div></div>
+        <div class="tt-btns">
+          <button onclick="startNav(${r.id})" class="tt-btn tt-b">🧭 導航</button>
+          <button onclick="openDetail(${r.id})" class="tt-btn tt-o">詳情</button>
         </div>
-        <div class="tt-status" style="background:${sbg};color:${c};border:1px solid ${sbd};">
-          ${SL[r.status]} · ⏱ ${wt2}
-        </div>
-        <div class="tt-crowd"><div class="tt-crowd-fill" style="width:${crowdPct}%;background:${crowdClr};"></div></div>
-        <div class="tt-btn-row">
-          <button onclick="startNav(${r.id})" class="tt-btn tt-btn-b">🧭 導航</button>
-          <button onclick="openDetail(${r.id})" class="tt-btn tt-btn-o">詳情</button>
-        </div>
-      </div>`;
-
-    m.bindTooltip(content,{permanent:true,direction:'top',interactive:true,className:'leaflet-tooltip-own'}).openTooltip();
+      </div>`,
+      {permanent:true,direction:'top',interactive:true,className:'leaflet-tooltip-own'}).openTooltip();
   });
 
-  // 渲染人流分散推薦面板
-  renderRecPanel();
+  renderRec();
 }
 
-// ===== 人流分散推薦面板 =====
-function renderRecPanel(){
-  // 排序邏輯：以「等候時間最短 + 佔用率最低」為 AI 分散推薦指標
-  // 排除客滿，優先推最空的給使用者
-  const sorted=[...R]
-    .filter(r=>r.status!=='full')
-    .sort((a,b)=>{
-      // 複合分數：等候分鐘 * 0.6 + 佔用率 * 0.4
-      const scoreA = a.wait*0.6 + a.occ*0.4;
-      const scoreB = b.wait*0.6 + b.occ*0.4;
-      return scoreA - scoreB;
-    });
+// ── REC PANEL ──
+let recPanelOpen=true;
+function toggleRec(){
+  recPanelOpen=!recPanelOpen;
+  const p=document.getElementById('rec-panel');
+  const t=document.getElementById('rec-toggle');
+  p.classList.toggle('closed',!recPanelOpen);
+  if(t)t.textContent=recPanelOpen?'▲':'▼';
+}
 
-  const html = sorted.map((r,i)=>{
-    const c = r.occ>79?'var(--red)':r.occ>49?'var(--yellow)':'var(--accent)';
-    const wt = r.wait===0?'<span style="color:var(--accent);font-size:14px;font-weight:800;">立即入座</span>'
-      :`<span style="color:${c}">${r.wait}</span><small style="font-size:10px;color:var(--text3);font-weight:600;"> 分</small>`;
-    const isTop = i===0;
-    return `
-      <div class="rec-card${isTop?' top-pick':''}" onclick="openDetail(${r.id})">
-        ${isTop?'<div class="rec-top-badge">🤖 AI 首推</div>':''}
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;${isTop?'margin-top:6px;':''}">
-          <span style="font-size:16px;">${r.emoji}</span>
-          <div>
-            <div class="rec-card-name">${r.name}</div>
-            <div class="rec-card-cat">${r.cat} · 📍${r.dist}m</div>
-          </div>
-        </div>
-        <div class="rec-card-wait">${wt}</div>
-        <div class="rec-card-lbl">等候時間 · 佔用 ${r.occ}%</div>
-        <div class="rec-card-crowd"><div class="rec-card-crowd-fill" style="width:${r.occ}%;background:${c};"></div></div>
-        <div class="rec-card-btns">
-          <button class="rec-mini-btn rmbblue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
-          <button class="rec-mini-btn rmbout" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
-        </div>
-      </div>`;
+function renderRec(){
+  const sorted=[...R].filter(r=>r.status!=='full').sort((a,b)=>(a.wait*0.6+a.occ*0.4)-(b.wait*0.6+b.occ*0.4));
+  document.getElementById('rec-scroll').innerHTML=sorted.map((r,i)=>{
+    const clr=r.occ>79?'var(--red)':r.occ>49?'var(--yellow)':'var(--accent)';
+    const isTop=i===0;
+    const waitDisp=r.wait===0
+      ?`<div class="rcard-wait" style="color:var(--accent);">立即</div><div class="rcard-wait-lbl">空位入座 ✨</div>`
+      :`<div class="rcard-wait" style="color:${clr};">${r.wait}<span style="font-size:12px;font-weight:600;color:var(--text3);"> 分</span></div><div class="rcard-wait-lbl">等候 · 佔用 ${r.occ}%</div>`;
+    return`<div class="rcard${isTop?' top':''}" onclick="openDetail(${r.id})">
+      ${isTop?'<div class="rcard-badge">🤖 AI 首推</div>':''}
+      <div class="rcard-head" style="${isTop?'margin-top:8px;':''}">
+        <span class="rcard-ico">${r.emoji}</span>
+        <div style="min-width:0;"><div class="rcard-name">${r.name}</div><div class="rcard-cat">${r.cat} · 📍${r.dist}m</div></div>
+      </div>
+      ${waitDisp}
+      <div class="rcard-occ-bar"><div class="rcard-occ-fill" style="width:${r.occ}%;background:${clr};"></div></div>
+      <div class="rcard-btns">
+        <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
+        <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
+      </div>
+    </div>`;
   }).join('');
-
-  document.getElementById('rec-cards-row').innerHTML = html;
 }
 
-// ===== 推薦面板收合 =====
-let recPanelOpen = true;
-function toggleRecPanel(){
-  recPanelOpen = !recPanelOpen;
-  const panel = document.getElementById('map-rec-panel');
-  const arrow = document.getElementById('panel-arrow');
-  if(recPanelOpen){
-    panel.classList.remove('collapsed');
-    if(arrow){ arrow.textContent='▲'; arrow.style.transform='rotate(0deg)'; }
-  } else {
-    panel.classList.add('collapsed');
-    if(arrow){ arrow.textContent='▼'; arrow.style.transform='rotate(0deg)'; }
-  }
-}
-
-// ===== 導航 =====
+// ── NAVIGATION ──
 function startNav(id){
   const r=R.find(x=>x.id===id);if(!r||!map)return;
   selId=id;
-  if(window.innerWidth<=700) mTab('map');
-  if(routingControl){try{map.removeControl(routingControl);}catch(e){}routingControl=null;}
-  if(routeLine){try{map.removeLayer(routeLine);}catch(e){}routeLine=null;}
-
+  if(window.innerWidth<=700)mTab('map');
+  if(rc){try{map.removeControl(rc);}catch(e){}rc=null;}
+  if(rl){try{map.removeLayer(rl);}catch(e){}rl=null;}
   navState={active:false,id,distKm:null,timeMin:null};
-  showToast('🗺️ 正在規劃街道路線…');
+  showToast('🗺️ 正在規劃路線…');
 
   const fb=()=>{
     const d=(map.distance([uLat,uLng],[r.lat,r.lng])/1000).toFixed(2);
     const m2=Math.round(parseFloat(d)/0.08);
-    routeLine=L.polyline([[uLat,uLng],[r.lat,r.lng]],{color:'#2563eb',weight:5,opacity:0.85,dashArray:'10,6'}).addTo(map);
+    rl=L.polyline([[uLat,uLng],[r.lat,r.lng]],{color:'#2563eb',weight:5.5,opacity:0.85,dashArray:'10,6'}).addTo(map);
     map.fitBounds([[uLat,uLng],[r.lat,r.lng]],{padding:[60,60]});
     navState={active:true,id,distKm:d,timeMin:m2};
-    showNavBar(r,'⬆️',d,m2);showToast('🧭 導航至 '+r.name+'（'+d+'公里）');
-    // 若詳情正在開著，刷新 ETA
-    if(selId===id && document.getElementById('detail').classList.contains('open')) openDetail(id);
+    showNB(r,'⬆️',d,m2);showToast('🧭 '+r.name+' · '+d+'公里');
+    if(selId===id&&document.getElementById('detail').classList.contains('open'))openDetail(id);
   };
-
   if(typeof L.Routing!=='undefined'){
     try{
-      routingControl=L.Routing.control({
+      rc=L.Routing.control({
         waypoints:[L.latLng(uLat,uLng),L.latLng(r.lat,r.lng)],
         routeWhileDragging:false,addWaypoints:false,fitSelectedRoutes:true,
         createMarker:()=>null,
-        lineOptions:{styles:[{color:'#2563eb',opacity:0.85,weight:6}]}
+        lineOptions:{styles:[{color:'#2563eb',opacity:0.88,weight:6}]}
       }).addTo(map);
-      routingControl.on('routesfound',function(e){
-        const rt=e.routes[0];
-        const d=(rt.summary.totalDistance/1000).toFixed(2);
-        const m2=Math.round(rt.summary.totalTime/60);
-        let arrow='⬆️';
-        if(rt.instructions&&rt.instructions.length>0){
-          const step=rt.instructions[0].text.toLowerCase();
-          if(step.includes('left')||step.includes('左'))arrow='⬅️';
-          else if(step.includes('right')||step.includes('右'))arrow='➡️';
-        }
+      rc.on('routesfound',e=>{
+        const rt=e.routes[0];const d=(rt.summary.totalDistance/1000).toFixed(2);const m2=Math.round(rt.summary.totalTime/60);
+        let arr='⬆️';
+        if(rt.instructions&&rt.instructions.length>0){const s=rt.instructions[0].text.toLowerCase();if(s.includes('left')||s.includes('左'))arr='⬅️';else if(s.includes('right')||s.includes('右'))arr='➡️';}
         navState={active:true,id,distKm:d,timeMin:m2};
-        showNavBar(r,arrow,d,m2);
-        showToast('🧭 '+d+'公里 · 約'+m2+'分鐘');
-        // 刷新詳情面板 ETA
-        if(selId===id && document.getElementById('detail').classList.contains('open')) openDetail(id);
+        showNB(r,arr,d,m2);showToast('🧭 '+d+'公里 · 約'+m2+'分鐘');
+        if(selId===id&&document.getElementById('detail').classList.contains('open'))openDetail(id);
       });
-      routingControl.on('routingerror',fb);
+      rc.on('routingerror',fb);
     }catch(e){fb();}
   }else fb();
 }
-
-function showNavBar(r,arrow,d,m2){
-  document.getElementById('nav-arrow').textContent=arrow;
+function showNB(r,arr,d,m2){
+  document.getElementById('nav-arrow').textContent=arr;
   document.getElementById('nav-main').textContent='前往 '+r.name;
   document.getElementById('nav-sub').textContent='路程 '+d+' 公里 · 預估 '+m2+' 分鐘';
   document.getElementById('navb').classList.add('show');
 }
-
 function stopNav(){
-  if(routingControl&&map){try{map.removeControl(routingControl);}catch(e){}routingControl=null;}
-  if(routeLine&&map){try{map.removeLayer(routeLine);}catch(e){}routeLine=null;}
+  if(rc&&map){try{map.removeControl(rc);}catch(e){}rc=null;}
+  if(rl&&map){try{map.removeLayer(rl);}catch(e){}rl=null;}
   navState={active:false,id:null,distKm:null,timeMin:null};
   document.getElementById('navb').classList.remove('show');
   showToast('已結束導航');
 }
 
-// ===== 詳情面板 =====
+// ── DETAIL ──
 function openDetail(id){
   const r=R.find(x=>x.id===id);if(!r)return;
   selId=id;
   const isFav=favs.has(id);
-
-  // ── 建議抵達時間計算 ──
-  const eta=calcArrival(r);
-
-  // 等候進度條顏色
-  const crowdClr=r.occ>79?'var(--red)':r.occ>49?'var(--yellow)':'var(--accent)';
+  const eta=calcETA(r);
   const sc=r.status==='open'?'var(--accent)':r.status==='busy'?'var(--yellow)':'var(--red)';
   const sbg=r.status==='open'?'var(--abg)':r.status==='busy'?'var(--ybg)':'var(--rbg)';
   const sbd=r.status==='open'?'var(--abd)':r.status==='busy'?'#fde68a':'#fca5a5';
-
-  // 峰值圖表
+  const clr=r.occ>79?'var(--red)':r.occ>49?'var(--yellow)':'var(--accent)';
   const maxP=Math.max(...r.peak,1);
-  const bars=r.peak.map((v,i)=>{const p=Math.round(v/maxP*100);const c=p>79?'#ef4444':p>59?'#f97316':p>39?'#fde047':'#86efac';return`<div class="cbc"><div class="cb" style="height:${Math.max(p,5)}%;background:${c};"></div><div class="cl">${PH[i]}</div></div>`;}).join('');
+  const bars=r.peak.map((v,i)=>{const p=Math.round(v/maxP*100);const c=p>79?'#ef4444':p>59?'#f97316':p>39?'#fde047':'#86efac';return`<div class="cbc"><div class="cb" style="height:${Math.max(p,5)}%;background:${c};border-radius:4px 4px 0 0;"></div><div class="cl">${PH[i]}</div></div>`;}).join('');
+  const seats=[];for(let i=0;i<r.st;i++){if(i<r.su-Math.floor(r.su*0.2))seats.push('used');else if(i<r.su)seats.push('soon');else seats.push('free');}
+  const seatGrid=seats.map(s=>`<div class="seat ${s}">${s==='used'?'●':s==='soon'?'◑':'○'}</div>`).join('');
+  const tags=r.tags.map(t=>`<span class="f-tag">✅ ${t}</span>`).join('');
+  const menu=r.menu.map(f=>`<div class="food-item"><span class="food-name">${f.n}</span><div style="display:flex;align-items:center;gap:8px;"><span class="food-p">$${f.p}</span><button class="food-btn" onclick="showToast('🛒 已加入：${f.n}')">點餐</button></div></div>`).join('');
+  const revs=r.comments.map(c=>`<div class="rev-item"><div class="rev-hd"><span>👤 ${c.u}</span><span>${c.s}</span></div><div class="rev-txt">${c.t}</div></div>`).join('');
+  const disperse=r.occ>79?{dot:'var(--red)',txt:`此餐廳人滿為患（${r.occ}%），建議選擇 AI 首推的替代餐廳`}:r.occ>49?{dot:'var(--yellow)',txt:`此餐廳略有人潮（${r.occ}%），現在前往在合理等候範圍內`}:{dot:'var(--accent)',txt:`此餐廳空位充足（${r.occ}%），正是分散人流的絕佳選擇 🎉`};
+  const rec=R.filter(x=>x.id!==id&&x.status!=='full').sort((a,b)=>a.wait-b.wait)[0];
+  const navOn=navState.active&&navState.id===id;
+  const qi=[{rk:'1',n:'候位組 #1',l:'距離50公尺・已就位',tag:'tags',lb:'即將入座'},{rk:'你',n:'候位組 #2（您）',l:`距離${r.dist}公尺・步行中`,tag:'tagm',lb:'移動中',me:true},{rk:'3',n:'候位組 #3',l:'距離1.2公里・搭車中',tag:'tagw',lb:'等候中'},{rk:'4',n:'候位組 #4',l:'距離2.0公里',tag:'tagw',lb:'等候中'}];
+  const qH=qi.map(q=>`<div class="qi"><div class="qnum ${q.me?'qme':'qot'}">${q.rk}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--text);">${q.n}</div><div style="font-size:11px;color:var(--text2);margin-top:1px;">${q.l}</div></div><div class="qtag ${q.tag}">${q.lb}</div></div>`).join('');
 
-  // 標籤、菜單、評論
-  const tagsHtml=r.tags.map(t=>`<span class="f-tag">✅ ${t}</span>`).join('');
-  const menuHtml=r.menu.map(f=>`<div class="food-item"><div><span style="font-size:13px;font-weight:700;">${f.n}</span></div><div style="display:flex;align-items:center;gap:8px;"><span class="food-p">$${f.p}</span><button class="food-order-btn" onclick="showToast('🛒 已加入點餐車：${f.n}')">點餐</button></div></div>`).join('');
-  const reviewsHtml=r.comments.map(c=>`<div class="review-item"><div class="rev-hd"><span>👤 ${c.u}</span><span>${c.s}</span></div><div class="rev-txt">${c.t}</div></div>`).join('');
-
-  // 導航按鈕文字
-  const navBtnTxt = navState.active&&navState.id===id ? '✅ 導航進行中' : '🧭 一鍵導航前往';
-  const navBtnClass = navState.active&&navState.id===id ? 'nav-cta-btn nav-active' : 'nav-cta-btn';
-
-  // 人流分散建議
-  const disperse = r.occ>79
-    ? {dot:'var(--red)',txt:`此餐廳目前人滿為患（佔用率 ${r.occ}%），建議考慮 AI 首推的替代選項`}
-    : r.occ>49
-    ? {dot:'var(--yellow)',txt:`此餐廳略有人潮（佔用率 ${r.occ}%），現在前往仍在合理等候範圍`}
-    : {dot:'var(--accent)',txt:`此餐廳目前空位充足（佔用率 ${r.occ}%），是分散人流的絕佳選擇 🎉`};
-
-  document.getElementById('detail-inner').innerHTML=`
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-  <div style="font-size:12px;font-weight:700;color:var(--text3);">📋 餐廳詳情</div>
-  <button onclick="closeDetail()" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
+  document.getElementById('detail-scroll').innerHTML=`
+<div class="detail-topbar">
+  <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">📋 餐廳詳情</div>
+  <button class="detail-close" onclick="closeDetail()">✕</button>
 </div>
 
-<div class="dp-hd">
-  <div class="dp-emoji">${r.emoji}</div>
+<div class="d-hero">
+  <div class="d-ico">${r.emoji}</div>
   <div style="flex:1;min-width:0;">
-    <div class="dp-name">${r.name}</div>
-    <span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:${sbg};color:${sc};border:1px solid ${sbd};">● ${r.status==='open'?'營業中・位子充足':r.status==='busy'?'營業中・等候中':'客滿'}</span>
-    <div class="dp-sub" style="margin-top:3px;">⭐${r.rating} (${r.reviews.toLocaleString()}則) · ${r.cat} · ${r.price}</div>
-    <div class="dp-sub">🕐${r.hours} · 📍${r.addr}</div>
+    <div class="d-name">${r.name}</div>
+    <div class="d-status-pill" style="background:${sbg};color:${sc};border:1px solid ${sbd};">
+      <span style="font-size:8px;">●</span> ${r.status==='open'?'營業中・位子充足':r.status==='busy'?'營業中・等候中':'客滿'}
+    </div>
+    <div class="d-sub">⭐ ${r.rating} <span style="color:var(--text3);">(${r.reviews.toLocaleString()}則)</span> · ${r.cat} · ${r.price}</div>
+    <div class="d-sub">🕐 ${r.hours}</div>
+    <div class="d-sub">📍 ${r.addr}</div>
   </div>
 </div>
 
-<div class="dprow">
-  <button class="dpbtn dpbtn-outline" onclick="toggleFav(${r.id})" style="flex:0 0 auto;width:auto;padding:12px 16px;">${isFav?'❤️ 已收藏':'🤍 收藏'}</button>
-  <button class="dpbtn dpbtn-green" style="flex:1;" onclick="showToast('✅ 已加入候位！系統將於入座時通知您')">🔔 遠端候位</button>
+<div class="d-actions">
+  <button class="dab dab-blue" onclick="startNav(${r.id})">🧭 導航</button>
+  <button class="dab dab-green" onclick="showToast('✅ 已加入候位！')">🔔 候位</button>
+  <button class="dab dab-out" onclick="toggleFav(${r.id})">${isFav?'❤️':'🤍'}</button>
 </div>
 
-<!-- ===== 建議抵達時間（與導航連動）===== -->
-<div class="eta-arrive-card">
-  <div class="eta-arrive-header">
-    ⏱ AI 建議抵達時間
-    <span class="eta-arrive-header eta-live-tag">${navState.active&&navState.id===id?'🧭 導航連動':'估算模式'}</span>
+<div class="d-itabs">
+  <div class="d-itab on" id="it-in" onclick="swI('in')">🪑 店內狀態</div>
+  <div class="d-itab" id="it-out" onclick="swI('out')">🚶 排隊狀態</div>
+  <div class="d-itab" id="it-info" onclick="swI('info')">ℹ️ 餐廳資訊</div>
+</div>
+
+<!-- 店內狀態 -->
+<div class="icontent on" id="ic-in">
+  <div class="stat3">
+    <div class="sbox rb"><div style="font-size:18px;margin-bottom:2px;">🪑</div><div class="sbox-v" style="color:var(--red);">${r.su}</div><div class="sbox-l">使用中 · ${r.occ}%</div></div>
+    <div class="sbox gb"><div style="font-size:18px;margin-bottom:2px;">🟢</div><div class="sbox-v" style="color:var(--accent);">${r.st-r.su}</div><div class="sbox-l">空桌 · ${100-r.occ}%</div></div>
+    <div class="sbox bb"><div style="font-size:18px;margin-bottom:2px;">⏱</div><div class="sbox-v" style="color:var(--blue);">~${r.turn}</div><div class="sbox-l">翻桌(分) · 良好</div></div>
   </div>
-
-  <div class="eta-time-big">${eta.bestArrival}</div>
-  <div class="eta-time-range">建議 ${eta.bestArrival} – ${eta.latestArrival} 之間抵達</div>
-  <div class="eta-sub-desc">${eta.suggestion}<br><span style="color:var(--text3);font-size:10px;">${eta.navSource}</span></div>
-
-  <!-- 步驟拆解：出發時間 → 移動時間 → 等候時間 → 入座 -->
-  <div class="eta-steps-row">
-    <div class="eta-step-box">
-      <div class="eta-step-ico">📍</div>
-      <div class="eta-step-val">${eta.departTime}</div>
-      <div class="eta-step-lbl">建議出發</div>
+  <div class="seat-map">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:700;color:var(--text2);">📐 座位即時狀態 (CCTV+AI)</span>
+      <span style="font-size:10px;color:var(--text3);">19:32 ↺</span>
     </div>
-    <div class="eta-step-box">
-      <div class="eta-step-ico">${navState.active&&navState.id===id?'🚗':'🚶'}</div>
-      <div class="eta-step-val">${eta.travelMins}分</div>
-      <div class="eta-step-lbl">${navState.active&&navState.id===id?'導航距離':'步行估算'}</div>
-    </div>
-    <div class="eta-step-box">
-      <div class="eta-step-ico">⏳</div>
-      <div class="eta-step-val">${eta.arrivalWait===0?'0分':eta.arrivalWait+'分'}</div>
-      <div class="eta-step-lbl">抵達後等候</div>
-    </div>
-    <div class="eta-step-box">
-      <div class="eta-step-ico">🍽</div>
-      <div class="eta-step-val">${eta.bestArrival}</div>
-      <div class="eta-step-lbl">預計入座</div>
+    <div class="seat-grid">${seatGrid}</div>
+    <div class="seat-legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--rbg);border:1.5px solid #fca5a5;"></div>使用中</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--obg);border:1.5px solid #fdba74;"></div>即將清空</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--abg);border:1.5px solid var(--abd);"></div>可用</div>
     </div>
   </div>
+  <div class="block"><div class="block-t">📊 今日用餐尖峰時段預測</div><div class="cbars">${bars}</div></div>
 
-  <!-- 人流分散建議條 -->
-  <div class="crowd-advice-bar">
-    <div class="crowd-advice-dot" style="background:${disperse.dot};"></div>
-    <div style="font-size:11px;color:var(--text2);">${disperse.txt}</div>
-  </div>
-
-  <button class="${navBtnClass}" onclick="startNav(${r.id})">
-    ${navBtnTxt}
-    ${navState.active&&navState.id===id?'':'<span style="font-size:12px;opacity:0.8;">→ 開始後自動精算抵達時間</span>'}
-  </button>
-</div>
-
-<!-- 現場候位狀況 -->
-<div class="cwrap" style="border-left:4px solid ${crowdClr};">
-  <div class="cwrap-t">🛑 現場即時候位進度</div>
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <div style="font-size:13px;color:var(--text2);">排隊組數：<strong style="color:var(--red);font-size:16px;">${r.queue}</strong> 組<br>預估等候：<strong>${r.wait}</strong> 分鐘<br>每分鐘增加：${r.qg} 人</div>
-    <div style="text-align:right;font-size:11px;color:var(--text3);">座位佔用率<div style="font-size:24px;font-weight:900;color:${crowdClr};line-height:1.1;">${r.occ}%</div></div>
-  </div>
-  <div style="margin-top:8px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;"><div style="width:${r.occ}%;height:100%;background:${crowdClr};border-radius:3px;transition:width 0.5s;"></div></div>
-</div>
-
-<!-- 店家公告 -->
-<div class="cwrap" style="background:var(--obg);border-color:#fed7aa;">
-  <div class="cwrap-t" style="color:var(--orange);">📢 店家即時公告</div>
-  <div style="font-size:12px;color:var(--text);line-height:1.5;">${r.announcement}</div>
-</div>
-
-<!-- 特色標籤 -->
-<div class="tag-wrap">${tagsHtml}</div>
-
-<!-- 今日尖峰時段 -->
-<div class="cwrap">
-  <div class="cwrap-t">📊 今日用餐尖峰時段預測</div>
-  <div class="cbars">${bars}</div>
-</div>
-
-<!-- 評分拆解 -->
-<div class="cwrap">
-  <div class="cwrap-t">⭐ 顧客評分維度 (綜合 ${r.rating})</div>
-  <div class="rating-grid" style="margin-top:4px;">
-    <div>🍱 美味：⭐${r.scores.food}</div>
-    <div>💁 服務：⭐${r.scores.service}</div>
-    <div>🌿 環境：⭐${r.scores.env}</div>
-    <div>🪙 CP值：⭐${r.scores.cp}</div>
+  <!-- ETA 卡片 -->
+  <div class="eta-card">
+    <div class="eta-tag">⏱ AI 建議抵達時間<span class="eta-mode-pill">${navOn?'🧭 導航連動':'估算模式'}</span></div>
+    <div class="eta-time">${eta.best}</div>
+    <div class="eta-range">建議 ${eta.best} – ${eta.latest} 之間抵達</div>
+    <div class="eta-desc">${eta.hint}<br><span style="color:var(--text3);font-size:10px;">${eta.src}</span></div>
+    <div class="eta-steps">
+      <div class="estep"><div class="estep-ico">📍</div><div class="estep-val">${eta.depStr}</div><div class="estep-lbl">建議出發</div></div>
+      <div class="estep"><div class="estep-ico">${navOn?'🚗':'🚶'}</div><div class="estep-val">${eta.travel}分</div><div class="estep-lbl">${navOn?'導航距離':'步行估算'}</div></div>
+      <div class="estep"><div class="estep-ico">⏳</div><div class="estep-val">${eta.arrWait===0?'0分':eta.arrWait+'分'}</div><div class="estep-lbl">抵達後等候</div></div>
+      <div class="estep"><div class="estep-ico">🍽</div><div class="estep-val">${eta.best}</div><div class="estep-lbl">預計入座</div></div>
+    </div>
+    <div class="crowd-bar">
+      <div class="crowd-dot" style="background:${disperse.dot};"></div>
+      <div class="crowd-txt">${disperse.txt}</div>
+    </div>
+    <button class="nav-cta ${navOn?'active-nav':''}" onclick="startNav(${r.id})">
+      ${navOn?'✅ 導航進行中 · 抵達時間精算中':'🧭 一鍵導航 · 開啟後自動精算抵達時間'}
+    </button>
   </div>
 </div>
 
-<!-- 必點菜單 -->
-<div class="cwrap">
-  <div class="cwrap-t">🔥 招牌必點菜單</div>
-  ${menuHtml}
+<!-- 排隊狀態 -->
+<div class="icontent" id="ic-out">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+    <div class="block" style="margin-bottom:0;"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">👥 目前排隊</div><div style="font-size:24px;font-weight:900;color:var(--text);">${r.queue}<span style="font-size:13px;color:var(--text3);"> 組</span></div></div>
+    <div class="block" style="margin-bottom:0;"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">⏱ 預估候位</div><div style="font-size:24px;font-weight:900;color:var(--text);">${r.wait}<span style="font-size:13px;color:var(--text3);"> 分</span></div></div>
+    <div class="block" style="margin-bottom:0;"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">📈 每分增加</div><div style="font-size:24px;font-weight:900;color:var(--text);">${r.qg}<span style="font-size:13px;color:var(--text3);"> 人</span></div></div>
+    <div class="block" style="margin-bottom:0;"><div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;">🔄 翻桌速度</div><div style="font-size:18px;font-weight:900;color:var(--accent);">良好</div></div>
+  </div>
+  <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px;"><div style="width:${r.occ}%;height:100%;background:${clr};border-radius:3px;"></div></div>
+  <div class="notice">🔔 建議提前預訂，或避開尖峰時段前往！<button class="nbtn" onclick="showToast('將於有空位時通知您')">查看替代</button></div>
+  <div class="block">
+    <div class="block-t">📡 即時候位隊列</div>
+    ${qH}
+  </div>
+  ${rec?`<div class="airec"><div class="airec-t">🤖 AI 推薦替代方案</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div style="font-size:28px;">${rec.emoji}</div><div><div style="font-size:14px;font-weight:700;color:var(--text);">${rec.name}</div><div style="font-size:11px;color:var(--text2);">距離${rec.dist}公尺 · 等候${rec.wait}分 · ${SL[rec.status]}</div></div></div><div style="display:flex;gap:8px;"><button class="dab dab-blue" style="font-size:13px;padding:10px;" onclick="startNav(${rec.id})">🧭 導航前往</button><button class="dab dab-out" style="font-size:13px;padding:10px;" onclick="openDetail(${rec.id})">查看詳情</button></div></div>`:''}
+  <button class="nav-cta dab-green" style="background:linear-gradient(135deg,var(--accent),#16a34a);box-shadow:0 4px 14px rgba(5,150,105,0.3);margin-top:4px;" onclick="showToast('✅ 已加入候位！')">🔔 加入候位</button>
 </div>
 
-<!-- 評論 -->
-<div class="cwrap">
-  <div class="cwrap-t">💬 顧客評價 (${r.reviews.toLocaleString()}則)</div>
-  ${reviewsHtml}
-</div>
-`;
+<!-- 餐廳資訊 -->
+<div class="icontent" id="ic-info">
+  <div class="announce"><div class="announce-t">📢 店家最新公告</div><div style="font-size:12px;color:var(--text);line-height:1.6;">${r.announcement}</div></div>
+  <div class="tag-wrap">${tags}</div>
+  <div class="block">
+    <div class="block-t">⭐ 顧客評分 (綜合 ${r.rating})</div>
+    <div class="rating-grid">
+      <div>🍱 美味：⭐ ${r.scores.food}</div>
+      <div>💁 服務：⭐ ${r.scores.service}</div>
+      <div>🌿 環境：⭐ ${r.scores.env}</div>
+      <div>🪙 CP值：⭐ ${r.scores.cp}</div>
+    </div>
+  </div>
+  <div class="block"><div class="block-t">🔥 招牌必點菜單</div>${menu}</div>
+  <div class="block"><div class="block-t">💬 顧客評價 (${r.reviews.toLocaleString()}則)</div>${revs}</div>
+</div>`;
 
   document.getElementById('detail').classList.add('open');
-  if(window.innerWidth<=700) mTab('detail');
+  if(window.innerWidth<=700)mTab('detail');
 }
 
-function closeDetail(){
-  document.getElementById('detail').classList.remove('open');
-  if(window.innerWidth<=700) mTab('map');
+function swI(t){
+  ['in','out','info'].forEach(x=>{
+    const a=document.getElementById('it-'+x);const b=document.getElementById('ic-'+x);
+    if(a)a.classList.toggle('on',x===t);if(b)b.classList.toggle('on',x===t);
+  });
 }
+function closeDetail(){document.getElementById('detail').classList.remove('open');if(window.innerWidth<=700)mTab('map');}
 
-function toggleFav(id){
-  if(favs.has(id))favs.delete(id);else favs.add(id);
-  openDetail(id);updateFavList();
-}
-
+// ── FAVS ──
+function toggleFav(id){if(favs.has(id))favs.delete(id);else favs.add(id);openDetail(id);updateFavList();}
 function updateFavList(){
   const el=document.getElementById('fav-list');if(!el)return;
   const list=R.filter(r=>favs.has(r.id));
   el.innerHTML=list.length?list.map(r=>`<div class="mycard" onclick="openDetail(${r.id})">
     <div class="mycard-ico">${r.emoji}</div>
-    <div class="mycard-info"><div class="mycard-name">${r.name}</div><div class="mycard-sub">${r.cat} · ⭐${r.rating} · 等候${r.wait}分</div></div>
-    <div style="cursor:pointer;font-size:16px;" onclick="event.stopPropagation();favs.delete(${r.id});showToast('已移除收藏');updateFavList();">🗑</div>
-  </div>`).join(''):'<div style="padding:15px;text-align:center;color:var(--text3);font-size:13px;">🤍 還沒有收藏的餐廳</div>';
+    <div style="flex:1;min-width:0;"><div class="mycard-name">${r.name}</div><div class="mycard-sub">${r.cat} · ⭐${r.rating} · 等候${r.wait}分</div></div>
+    <div style="cursor:pointer;font-size:16px;padding:4px;" onclick="event.stopPropagation();favs.delete(${r.id});showToast('已移除收藏');updateFavList();">🗑</div>
+  </div>`).join(''):'<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">🤍 尚無收藏的餐廳</div>';
 }
 
-// ===== 列表卡片 =====
+// ── CARDS ──
 function renderCards(){
   let list=[...R];
   const q=document.getElementById('search-input').value.trim().toLowerCase();
-  if(q) list=list.filter(r=>r.name.includes(q)||r.cat.includes(q)||r.menu.some(f=>f.n.includes(q)));
-  if(cF!=='all') list=list.filter(r=>r.status===cF);
-  if(cS==='wait') list.sort((a,b)=>a.wait-b.wait);
-  else if(cS==='rating') list.sort((a,b)=>b.rating-a.rating);
-  else if(cS==='dist') list.sort((a,b)=>a.dist-b.dist);
+  if(q)list=list.filter(r=>r.name.includes(q)||r.cat.includes(q)||r.menu.some(f=>f.n.includes(q)));
+  if(cF!=='all')list=list.filter(r=>r.status===cF);
+  if(cS==='wait')list.sort((a,b)=>a.wait-b.wait);
+  else if(cS==='rating')list.sort((a,b)=>b.rating-a.rating);
+  else if(cS==='dist')list.sort((a,b)=>a.dist-b.dist);
+  const clrFn=r=>r.status==='open'?'var(--accent)':r.status==='busy'?'var(--yellow)':'var(--red)';
   document.getElementById('card-list').innerHTML=list.length?list.map(r=>`
 <div class="rc" onclick="openDetail(${r.id})">
-  <div class="rc-top">
-    <div class="rc-img">${r.emoji}</div>
+  <div class="rc-row">
+    <div class="rc-ico">${r.emoji}</div>
     <div class="rc-info">
       <div class="rc-name">${r.name}</div>
-      <div class="rc-cat">${r.cat} · ⭐${r.rating} · 📍${r.dist}m · ⏱${r.wait}分</div>
+      <div class="rc-meta">
+        <span class="badge ${BC[r.status]}">${SL[r.status]}</span>
+        <span style="color:var(--text3);">⭐${r.rating}</span>
+        <span style="color:var(--text3);">📍${r.dist}m</span>
+      </div>
     </div>
-    <div class="badge ${BC[r.status]}">${SL[r.status]}</div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div class="rc-wait" style="color:${clrFn(r)};">${r.wait===0?'立即':r.wait}<span style="font-size:11px;color:var(--text3);font-weight:600;">${r.wait===0?'入座':'分'}</span></div>
+      <div class="rc-wait-lbl">等候時間</div>
+    </div>
   </div>
-</div>`).join(''):'<div style="text-align:center;padding:30px;color:var(--text3);">找不到符合的餐廳</div>';
+  <div class="rc-bar"><div class="rc-bar-fill" style="width:${r.occ}%;background:${clrFn(r)};"></div></div>
+</div>`).join(''):'<div style="text-align:center;padding:36px;color:var(--text3);">找不到符合的餐廳</div>';
 }
-
-function setFilter(f,el){cF=f;document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderCards();}
-function setSort(s,el){cS=s;document.querySelectorAll('#sort-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderCards();}
+function setFilter(f,el){cF=f;document.querySelectorAll('.nf').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderCards();}
+function setSort(s,el){cS=s;document.querySelectorAll('#sort-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderCards();}
 document.getElementById('search-input').addEventListener('input',renderCards);
 
+// ── MAP UTILS ──
 function locateMe(){
   showToast('🔍 定位中…');
   if(!navigator.geolocation){showToast('此裝置不支援定位');return;}
@@ -970,41 +1059,34 @@ function locateMe(){
     ()=>{if(map)map.flyTo([uLat,uLng],16);showToast('⚠️ 使用預設位置（高餐大）');}
   );
 }
-
 function toggleLayer(){
   useDark=!useDark;
   if(map){if(useDark){map.removeLayer(lL);lD.addTo(map);}else{map.removeLayer(lD);lL.addTo(map);}}
   document.getElementById('layer-btn').textContent=useDark?'☀️':'🌙';
-  showToast(useDark?'暗色地圖':'亮色地圖');
+  showToast(useDark?'已切換暗色地圖':'已切換亮色地圖');
 }
-
 function switchSTab(t){
   ['list','my'].forEach(x=>{
-    document.getElementById('stab-'+x).classList.toggle('active',x===t);
-    document.getElementById('sp-'+x).classList.toggle('active',x===t);
+    document.getElementById('stab-'+x).classList.toggle('on',x===t);
+    document.getElementById('sp-'+x).classList.toggle('on',x===t);
   });
 }
-
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('mopen');
-}
-
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('mopen');}
 function mTab(t){
-  document.querySelectorAll('.mobt').forEach(b=>b.classList.remove('active'));
-  document.getElementById('mobt-'+t).classList.add('active');
-  const sb=document.getElementById('sidebar');
-  const dt=document.getElementById('detail');
-  if(t==='map'){sb.classList.remove('mopen');dt.classList.remove('open');setTimeout(()=>{if(map)map.invalidateSize();},250);}
+  document.querySelectorAll('.mobt').forEach(b=>b.classList.remove('on'));
+  document.getElementById('mobt-'+t).classList.add('on');
+  const sb=document.getElementById('sidebar'),dt=document.getElementById('detail');
+  if(t==='map'){sb.classList.remove('mopen');dt.classList.remove('open');setTimeout(()=>{if(map)map.invalidateSize();},260);}
   else if(t==='list'){sb.classList.add('mopen');dt.classList.remove('open');switchSTab('list');}
   else if(t==='detail'){sb.classList.remove('mopen');dt.classList.add('open');}
   else if(t==='my'){sb.classList.add('mopen');dt.classList.remove('open');switchSTab('my');}
 }
 
-// ===== INIT =====
+// ── INIT ──
 function loadJS(src,cb){const s=document.createElement('script');s.src=src;s.async=true;s.onload=cb;s.onerror=()=>cb();document.head.appendChild(s);}
 window.onload=()=>{
-  loadJS('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',function(){
-    loadJS('https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js',function(){
+  loadJS('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',()=>{
+    loadJS('https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js',()=>{
       initMap();renderCards();updateFavList();
       if(window.innerWidth<=700)mTab('map');
     });
