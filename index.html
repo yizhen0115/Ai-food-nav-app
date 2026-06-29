@@ -1122,6 +1122,9 @@ window.onload=()=>{
   loadJS('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',()=>{
     loadJS('https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js',()=>{
       initMap();renderCards();updateFavList();
+      // 自動開啟 AI 首推餐廳詳情（等候最短且佔用率最低）
+      const aiTop=[...R].filter(r=>r.status!=='full').sort((a,b)=>(a.wait*0.6+a.occ*0.4)-(b.wait*0.6+b.occ*0.4))[0];
+      if(aiTop) openDetail(aiTop.id);
       if(window.innerWidth<=700)mTab('map');
     });
   });
