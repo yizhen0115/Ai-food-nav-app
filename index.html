@@ -213,25 +213,25 @@ body{display:flex;flex-direction:column;}
 .rec-panel{
   position:absolute;bottom:0;left:0;right:0;z-index:10;
   background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);
-  border-top:1px solid var(--border);border-radius:22px 22px 0 0;
+  border-top:1px solid var(--border);border-radius:20px 20px 0 0;
   box-shadow:0 -4px 20px rgba(0,0,0,0.08);
   overflow:hidden;
   transition:max-height 0.38s cubic-bezier(0.32,0.72,0,1);
-  max-height:148px; /* 剛好容納 handle + header + 一排卡片 */
+  max-height:170px;
 }
-.rec-panel.closed{max-height:50px;}
+.rec-panel.closed{max-height:46px;}
 
 .rec-handle-row{
   display:flex;align-items:center;justify-content:center;
-  padding:8px 16px 0;cursor:pointer;
+  padding:6px 16px 0;cursor:pointer;
 }
 .rec-handle-bar{width:32px;height:3.5px;background:var(--border2);border-radius:2px;}
 
 .rec-header{
   display:flex;align-items:center;gap:7px;
-  padding:6px 14px 7px;cursor:pointer;
+  padding:5px 14px 6px;cursor:pointer;white-space:nowrap;overflow:hidden;
 }
-.rec-header-title{font-size:12px;font-weight:800;color:var(--text);letter-spacing:-0.2px;}
+.rec-header-title{font-size:12px;font-weight:800;color:var(--text);letter-spacing:-0.2px;white-space:nowrap;}
 .rec-live-pill{
   display:flex;align-items:center;gap:3px;
   background:var(--rbg);border:1px solid #fca5a5;
@@ -258,12 +258,11 @@ body{display:flex;flex-direction:column;}
 /* ── 推薦卡片（水平緊湊版）── */
 .rcard{
   flex-shrink:0;
-  /* 水平版：左側資訊 + 右側等候分數 */
   display:flex;align-items:center;gap:10px;
   background:var(--white);border:1.5px solid var(--border);
-  border-radius:13px;padding:9px 11px;cursor:pointer;
+  border-radius:13px;padding:8px 10px;cursor:pointer;
   transition:all 0.18s;box-shadow:var(--shadow-sm);
-  position:relative;min-width:190px;max-width:210px;
+  position:relative;width:200px;
   overflow:hidden;
 }
 .rcard:active{transform:scale(0.97);}
@@ -297,12 +296,12 @@ body{display:flex;flex-direction:column;}
 .rcard-occ-pct{font-size:9px;color:var(--text3);font-weight:600;flex-shrink:0;}
 
 /* 右側：等候時間 + 按鈕 */
-.rcard-right{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;}
-.rcard-wait-block{text-align:center;}
-.rcard-wait{font-size:20px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
-.rcard-wait-lbl{font-size:9px;color:var(--text3);font-weight:600;margin-top:1px;}
-.rcard-btns{display:flex;flex-direction:column;gap:4px;}
-.rbtn{width:52px;padding:5px 0;border-radius:8px;border:none;font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;white-space:nowrap;}
+.rcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.rcard-wait-block{text-align:right;}
+.rcard-wait{font-size:22px;font-weight:900;line-height:1;letter-spacing:-0.5px;}
+.rcard-wait-lbl{font-size:9px;color:var(--text3);font-weight:600;margin-top:1px;white-space:nowrap;}
+.rcard-btns{display:flex;flex-direction:row;gap:4px;}
+.rbtn{padding:6px 9px;border-radius:8px;border:none;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;white-space:nowrap;}
 .rbtn:active{transform:scale(0.95);}
 .rbtn-blue{background:var(--blue);color:#fff;}
 .rbtn-blue:hover{background:var(--blue2);}
@@ -544,25 +543,25 @@ body{display:flex;flex-direction:column;}
   background:rgba(255,255,255,0.97)!important;
   backdrop-filter:blur(8px)!important;
   border:1.5px solid var(--border)!important;
-  border-radius:14px!important;padding:10px 12px!important;
-  box-shadow:var(--shadow-lg)!important;
+  border-radius:12px!important;padding:8px 10px!important;
+  box-shadow:0 4px 16px rgba(0,0,0,0.14)!important;
   font-family:-apple-system,sans-serif!important;
   color:var(--text)!important;white-space:normal!important;
   pointer-events:auto!important;
 }
 .leaflet-tooltip-own::before{display:none!important;}
-.tt-card{width:152px;}
+.tt-card{width:138px;}
 .tt-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
 .tt-ico{font-size:17px;line-height:1;}
 .tt-name{font-size:12px;font-weight:800;color:var(--text);}
-.tt-status{font-size:10px;font-weight:700;display:inline-block;padding:2px 8px;border-radius:20px;margin-bottom:6px;}
+.tt-status{font-size:10px;font-weight:700;display:inline-block;padding:2px 7px;border-radius:20px;margin-bottom:5px;}
 .tt-row{display:flex;align-items:baseline;gap:4px;margin-bottom:2px;}
-.tt-wait{font-size:20px;font-weight:900;line-height:1;}
-.tt-wait-lbl{font-size:10px;color:var(--text3);font-weight:600;}
-.tt-occ{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:6px 0;}
+.tt-wait{font-size:17px;font-weight:900;line-height:1;}
+.tt-wait-lbl{font-size:9px;color:var(--text3);font-weight:600;}
+.tt-occ{height:2.5px;background:var(--border);border-radius:2px;overflow:hidden;margin:5px 0;}
 .tt-occ-fill{height:100%;border-radius:2px;}
-.tt-btns{display:flex;gap:5px;margin-top:7px;}
-.tt-btn{flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:all 0.15s;}
+.tt-btns{display:flex;gap:4px;margin-top:6px;}
+.tt-btn{flex:1;padding:6px 0;font-size:11px;font-weight:700;border:none;border-radius:7px;cursor:pointer;transition:all 0.15s;}
 .tt-btn:active{transform:scale(0.95);}
 .tt-b{background:var(--blue);color:#fff;}
 .tt-b:hover{background:var(--blue2);}
@@ -681,11 +680,8 @@ body{display:flex;flex-direction:column;}
         <div class="rec-handle-bar"></div>
       </div>
       <div class="rec-header" onclick="toggleRec()">
-        <span style="font-size:16px;">🤖</span>
-        <div>
-          <span class="rec-header-title">AI 人流分散推薦</span>
-          <span class="rec-header-sub">· 依等候與佔用率智慧排序</span>
-        </div>
+        <span style="font-size:15px;">🤖</span>
+        <span class="rec-header-title">AI 人流分散推薦</span>
         <div class="rec-live-pill"><div class="live-dot"></div>LIVE</div>
         <div class="rec-toggle" id="rec-toggle">▲</div>
       </div>
@@ -838,7 +834,7 @@ function renderRec(){
           <div class="rcard-wait-lbl">${waitLbl}</div>
         </div>
         <div class="rcard-btns">
-          <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭 導航</button>
+          <button class="rbtn rbtn-blue" onclick="event.stopPropagation();startNav(${r.id})">🧭</button>
           <button class="rbtn rbtn-out" onclick="event.stopPropagation();openDetail(${r.id})">詳情</button>
         </div>
       </div>
